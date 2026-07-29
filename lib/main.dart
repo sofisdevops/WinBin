@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/victory_sceen/victory_screen.dart';
+import 'screens/admin_screen/main_layout.dart';
 
 void main() {
   runApp(const MiAppWeb());
@@ -13,10 +14,8 @@ class MiAppWeb extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'WIN BIN :D',
-      theme: ThemeData(
-        fontFamily: 'Courier', 
-      ),
-      home: const VictoryScreen(),
+      theme: ThemeData(fontFamily: 'Courier'),
+      home: const MainLayout(),
     );
   }
 }
