@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:winbin/screens/admin_screen/gestion_puntos_view.dart';
 import 'widgets_admin/header_bar.dart';
 
 class MainLayout extends StatefulWidget {
@@ -12,7 +13,7 @@ class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
 
   final List<Widget> _views = const [
-    Center(child: Text('Vista: Gestión de Puntos')),
+    GestionPuntosView(),
     Center(child: Text('Vista: Configuración de Reglas')),
     Center(child: Text('Vista: Periodos')),
     Center(child: Text('Vista: Ranking & Filtros')),
