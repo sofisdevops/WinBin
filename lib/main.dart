@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'screens/victory_sceen/victory_screen.dart';
 import 'screens/admin_screen/main_layout.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(const MiAppWeb());
 }
 
