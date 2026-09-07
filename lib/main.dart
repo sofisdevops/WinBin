@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'screens/admin_screen/main_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:provider/provider.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  runApp(const MiAppWeb());
+  runApp(
+    MultiProvider(providers: [
+      ChangeNotifierProvider(create: (_) => AuthProvider()),
+    ],child: const MiAppWeb(),)
+  );
 }
 
 class MiAppWeb extends StatelessWidget {
