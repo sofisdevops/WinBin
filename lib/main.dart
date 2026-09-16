@@ -3,7 +3,7 @@ import 'screens/admin_screen/main_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
-
+import 'package:winbin/screens/login_screens/login_screen.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
@@ -23,7 +23,7 @@ class MiAppWeb extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'WIN BIN :D',
       theme: ThemeData(fontFamily: 'Courier'),
-      home: const MainLayout(),
+      home: LoginScreen(),
     );
   }
 }
