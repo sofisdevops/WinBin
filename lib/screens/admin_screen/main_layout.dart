@@ -89,18 +89,26 @@ class _MainLayoutState extends State<MainLayout> {
     final isSelected = _selectedIndex == index;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        tileColor: isSelected ? const Color(0xFF1B5E20) : Colors.transparent,
-        leading: Icon(icon, color: Colors.white),
-        title: Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
-        onTap: () {
-          if (!isAction) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          }
-        },
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          tileColor: isSelected ? const Color(0xFF1B5E20) : Colors.transparent,
+          leading: Icon(icon, color: Colors.white),
+          title: Text(
+            label,
+            style: cnst TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          onTap: () {
+            if (!isAction) {
+              setState(() { 
+                _selectedIndex = index;
+              });
+            }
+          },
+        ),
       ),
     );
   }

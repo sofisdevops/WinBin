@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:winbin/screens/admin_screen/main_layout.dart';
+import 'widgets_screen/custom_button.dart';
+import 'widgets_screen/custom_text.dart';
+import 'widgets_screen/login_footer.dart';
+import 'widgets_screen/login_header.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -8,15 +15,94 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _userController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _userController = TextEditingController();
+  final  _passwordController = TextEditingController();
   bool _isPasswordObscured = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _userController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _onLogin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final authProvider = context.read<AuthProvider>();
+
+      final bool exito = await authProvider
+          .iniciarSesion(
+            _userController.text.trim(),
+            _passwordController.text.trim(),
+          )
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              throw Exception('Tiempo de espera agotado');
+            },
+          );
+
+      if (!mounted) return;
+
+      if (exito) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Bienvenido, ${_userController.text}',
+              style: TextStyle(
+                fontFamily: 'Courier',
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor: const Color(0xFF00FF66),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute<void>(builder: (_) => const MainLayout()),
+        );
+      } else {
+        _mostrarError('Credenciales incorrectas');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _mostrarError('Error de conexión: Verifica el estado del servidor');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _mostrarError(String mensaje) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          mensaje,
+          style: const TextStyle(
+            fontFamily: 'Courier',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -37,226 +123,91 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Colors.black87,
                   blurRadius: 10,
                   offset: Offset(4, 4),
-                )
+                ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const _HeaderTitle(),
-                const SizedBox(height: 25),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const _HeaderTitle(),
+                  const SizedBox(height: 25),
 
-                _CustomTextField(
-                  label: 'USUARIO',
-                  hintText: 'Ingresa tu ID',
-                  controller: _userController,
-                ),
-                const SizedBox(height: 18),
+                  _CustomTextField(
+                    label: 'USUARIO',
+                    hintText: 'Ingresa tu Documento',
+                    controller: _userController,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Por favor ingresa tu documento';
+                      }
+                      if (value.trim().length < 4) {
+                        return 'El documento debe tener al menos 4 digitos';
+                      }
+                      if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+                        return 'Ingresa solo números';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 18),
 
-                _CustomTextField(
-                  label: 'CONTRASEÑA',
-                  hintText: '••••••••',
-                  controller: _passwordController,
-                  isPassword: true,
-                  isObscured: _isPasswordObscured,
-                  onToggleVisibility: () {
-                    setState(() {
-                      _isPasswordObscured = !_isPasswordObscured;
-                    });
-                  },
-                ),
-                const SizedBox(height: 25),
+                  _CustomTextField(
+                    label: 'CONTRASEÑA',
+                    hintText: '••••••••',
+                    controller: _passwordController,
+                    isPassword: true,
+                    isObscured: _isPasswordObscured,
+                    onToggleVisibility: () {
+                      setState(() {
+                        _isPasswordObscured = !_isPasswordObscured;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Por favor ingresa tu contraseña';
+                      }
+                      if (value.trim().length < 6) {
+                        return 'La contraseña debe tener al menos 6 caracteres';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 25),
+                  _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(color: Colors.green),
+                        )
+                      : _CustomButton(
+                          text: 'RECICLA',
+                          icon: Icons.recycling,
+                          backgroundColor: const Color(0xFF66BB6A),
+                          textColor: Colors.black,
+                          iconColor: Colors.black,
+                          onPressed: _onLogin,
+                        ),
+                  const SizedBox(height: 15),
 
-                _CustomButton(
-                  text: 'RECICLA',
-                  icon: Icons.recycling,
-                  backgroundColor: const Color(0xFF66BB6A),
-                  textColor: Colors.black,
-                  iconColor: Colors.black,
-                  onPressed: () {
-                  },
-                ),
-                const SizedBox(height: 15),
+                  _CustomButton(
+                    text: 'CREAR CUENTA',
+                    icon: Icons.person_add_outlined,
+                    backgroundColor: const Color(0xFFFF9999),
+                    textColor: const Color(0xFF800000),
+                    iconColor: const Color(0xFF800000),
+                    onPressed: () {},
+                  ),
+                  const SizedBox(height: 25),
 
-                _CustomButton(
-                  text: 'CREAR CUENTA',
-                  icon: Icons.person_add_outlined,
-                  backgroundColor: const Color(0xFFFF9999),
-                  textColor: const Color(0xFF800000),
-                  iconColor: const Color(0xFF800000),
-                  onPressed: () {
-                  },
-                ),
-                const SizedBox(height: 25),
+                  const Divider(color: Colors.grey, thickness: 1),
+                  const SizedBox(height: 10),
 
-                const Divider(color: Colors.grey, thickness: 1),
-                const SizedBox(height: 10),
-                
-                const _FooterText(),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeaderTitle extends StatelessWidget {
-  const _HeaderTitle();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text(
-      'WINBIN',
-      style: TextStyle(
-        color: Color(0xFF00FF66),
-        fontSize: 36,
-        fontFamily: 'Courier',
-        fontWeight: FontWeight.w900,
-        letterSpacing: 2,
-      ),
-    );
-  }
-}
-
-class _CustomTextField extends StatelessWidget {
-  final String label;
-  final String hintText;
-  final TextEditingController controller;
-  final bool isPassword;
-  final bool isObscured;
-  final VoidCallback? onToggleVisibility;
-
-  const _CustomTextField({
-    required this.label,
-    required this.hintText,
-    required this.controller,
-    this.isPassword = false,
-    this.isObscured = false,
-    this.onToggleVisibility,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFF66BB6A),
-            fontFamily: 'Courier',
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          color: Colors.white,
-          height: 48,
-          alignment: Alignment.center,
-          child: TextField(
-            controller: controller,
-            obscureText: isPassword && isObscured,
-            style: const TextStyle(
-              color: Colors.black,
-              fontFamily: 'Courier',
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-            decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: const TextStyle(
-                color: Colors.grey,
-                fontFamily: 'Courier',
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+                  const _FooterText(),
+                ],
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              border: InputBorder.none,
-              suffixIcon: isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        isObscured ? Icons.visibility_off : Icons.visibility,
-                        color: const Color(0xFF00FF66),
-                        size: 20,
-                      ),
-                      onPressed: onToggleVisibility,
-                    )
-                  : null,
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _CustomButton extends StatelessWidget {
-  final String text;
-  final IconData icon;
-  final Color backgroundColor;
-  final Color textColor;
-  final Color iconColor;
-  final VoidCallback onPressed;
-
-  const _CustomButton({
-    required this.text,
-    required this.icon,
-    required this.backgroundColor,
-    required this.textColor,
-    required this.iconColor,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: backgroundColor,
-      child: InkWell(
-        onTap: onPressed,
-        child: Container(
-          width: double.infinity,
-          height: 48,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.black, width: 2),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: iconColor, size: 22),
-              const SizedBox(width: 8),
-              Text(
-                text,
-                style: TextStyle(
-                  fontFamily: 'Courier',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: textColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FooterText extends StatelessWidget {
-  const _FooterText();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text(
-      'Empieza a ganar puntos y premios con tu reciclaje',
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        color: Color(0xFFFFCC00),
-        fontSize: 11,
-        fontFamily: 'Courier',
-        fontWeight: FontWeight.bold,
       ),
     );
   }
