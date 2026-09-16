@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+
 class HeaderBar extends StatelessWidget {
   const HeaderBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final usuario = authProvider.usuarioActual;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       color: const Color(0xFEEF7E8),
@@ -26,7 +31,10 @@ class HeaderBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 20),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_none)),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.notifications_none),
+          ),
           IconButton(onPressed: () {}, icon: const Icon(Icons.help_outline)),
           const SizedBox(width: 10),
           const CircleAvatar(
@@ -34,13 +42,22 @@ class HeaderBar extends StatelessWidget {
             child: Text('A', style: TextStyle(color: Colors.white)),
           ),
           const SizedBox(width: 8),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Admin Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-              Text('Edwin Torres', style: TextStyle(color: Colors.grey, fontSize: 10)),
+              Text(
+                usuario!.rol,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+              Text(
+                usuario!.nombre,
+                style: const TextStyle(color: Colors.grey, fontSize: 10),
+              ),
             ],
-          )
+          ),
         ],
       ),
     );

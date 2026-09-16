@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class _CustomTextField extends StatelessWidget {
+class CustomTextField extends StatelessWidget {
   final String label;
   final String hintText;
   final TextEditingController controller;
@@ -9,7 +9,7 @@ class _CustomTextField extends StatelessWidget {
   final VoidCallback? onToggleVisibility;
   final String? Function(String?)? validator;
 
-  const _CustomTextField({
+  const CustomTextField({
     required this.label,
     required this.hintText,
     required this.controller,

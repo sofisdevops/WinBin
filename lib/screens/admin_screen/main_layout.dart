@@ -3,6 +3,9 @@ import 'package:winbin/screens/admin_screen/gestion_puntos_view.dart';
 import 'configuracion_reglas_view.dart';
 import 'periodos_view.dart';
 import 'widgets_admin/header_bar.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:provider/provider.dart';
+import 'package:winbin/screens/login_screens/login_screen.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -21,6 +24,18 @@ class _MainLayoutState extends State<MainLayout> {
     Center(child: Text('Vista: Ranking & Filtros')),
     Center(child: Text('Vista: Gestión de Usuarios')),
   ];
+
+  Future<void> _cerrarSesion() async {
+    await context.read<AuthProvider>().logout();
+
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,14 +57,28 @@ class _MainLayoutState extends State<MainLayout> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.recycling, color: Color(0xFF2E7D32), size: 28),
+                      child: const Icon(
+                        Icons.recycling,
+                        color: Color(0xFF2E7D32),
+                        size: 28,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('WinBin Panel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                        Text('Recycling Management', style: TextStyle(color: Colors.white70, fontSize: 10)),
+                        Text(
+                          'WinBin Panel',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          'Recycling Management',
+                          style: TextStyle(color: Colors.white70, fontSize: 10),
+                        ),
                       ],
                     ),
                   ],
@@ -62,7 +91,15 @@ class _MainLayoutState extends State<MainLayout> {
                 _buildNavItem(4, Icons.people, 'Gestión de Usuarios'),
                 const Spacer(),
                 _buildNavItem(5, Icons.settings, 'Ajustes', isAction: true),
-                _buildNavItem(6, Icons.logout, 'Logout', isAction: true),
+                _buildNavItem(
+                  6,
+                  Icons.logout,
+                  'Logout',
+                  isAction: true,
+                  onTapCallback: () {
+                    _cerrarSesion();
+                  },
+                ),
                 const SizedBox(height: 20),
               ],
             ),
@@ -85,7 +122,13 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label, {bool isAction = false}) {
+  Widget _buildNavItem(
+    int index,
+    IconData icon,
+    String label, {
+    bool isAction = false,
+    VoidCallback? onTapCallback,
+  }) {
     final isSelected = _selectedIndex == index;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -99,14 +142,15 @@ class _MainLayoutState extends State<MainLayout> {
           leading: Icon(icon, color: Colors.white),
           title: Text(
             label,
-            style: cnst TextStyle(color: Colors.white, fontSize: 14),
+            style: const TextStyle(color: Colors.white, fontSize: 14),
           ),
           onTap: () {
             if (!isAction) {
-              setState(() { 
+              setState(() {
                 _selectedIndex = index;
               });
             }
+            onTapCallback?.call();
           },
         ),
       ),

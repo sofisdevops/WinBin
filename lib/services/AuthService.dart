@@ -20,7 +20,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        print('Login exitoso: ${data}');
+        print('Login exitoso');
         return LoginResponse.fromJson(data);
       } else {
         print('Error al iniciar sesión: ${response.statusCode}');
@@ -54,7 +54,7 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        print('Detalle de sesión creado/obtenido con éxito: $data');
+        print('Detalle de sesión creado/obtenido con éxito: ${response.statusCode}');
         return DetalleSessionResponse.fromJson(data);
       } else {
         print('Error al obtener detalles del usuario: ${response.statusCode}');
@@ -81,7 +81,7 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        print('perfiles obtenidos :${response.body}');
+        print('perfiles obtenidos :${response.statusCode}');
         return UsuarioPerfil.fromJson(jsonDecode(response.body));
       } else {
         print('Error al obtener perfil: ${response.statusCode}');
@@ -108,7 +108,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Periodo obtenido : $data');
+        print('Periodo obtenido : ${response.statusCode}');
         return Periodo.fromJson(data);
       } else {
         print('Error al obtener periodo: ${response.statusCode}');

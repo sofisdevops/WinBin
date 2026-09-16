@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class _HeaderTitle extends StatelessWidget {
-  const _HeaderTitle();
+class HeaderTitle extends StatelessWidget {
+  const HeaderTitle();
 
   @override
   Widget build(BuildContext context) {
