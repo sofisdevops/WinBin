@@ -10,6 +10,7 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
 
   const CustomTextField({
+    super.key,
     required this.label,
     required this.hintText,
     required this.controller,
@@ -34,43 +35,49 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Container(
-          color: Colors.white,
-          height: 48,
-          alignment: Alignment.center,
-          child: TextField(
-            controller: controller,
-            obscureText: isPassword && isObscured,
-            style: const TextStyle(
-              color: Colors.black,
+        TextFormField(
+          controller: controller,
+          obscureText: isPassword && isObscured,
+          validator: validator, 
+          style: const TextStyle(
+            color: Colors.black,
+            fontFamily: 'Courier',
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            filled: true,
+            fillColor: Colors.white,
+            errorStyle: const TextStyle(
+              color: Color(0xFFFF9999), 
+              fontFamily: 'Courier',
+              fontWeight: FontWeight.bold,
+            ),
+            hintStyle: const TextStyle(
+              color: Colors.grey,
               fontFamily: 'Courier',
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
-            decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: const TextStyle(
-                color: Colors.grey,
-                fontFamily: 'Courier',
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
-              border: InputBorder.none,
-              suffixIcon: isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        isObscured ? Icons.visibility_off : Icons.visibility,
-                        color: const Color(0xFF00FF66),
-                        size: 20,
-                      ),
-                      onPressed: onToggleVisibility,
-                    )
-                  : null,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
             ),
+            border: const OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.zero,
+            ),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      isObscured ? Icons.visibility_off : Icons.visibility,
+                      color: const Color(0xFF00FF66),
+                      size: 20,
+                    ),
+                    onPressed: onToggleVisibility,
+                  )
+                : null,
           ),
         ),
       ],

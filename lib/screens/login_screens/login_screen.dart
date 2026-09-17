@@ -6,6 +6,7 @@ import 'widgets_screen/custom_button.dart';
 import 'widgets_screen/custom_text.dart';
 import 'widgets_screen/login_footer.dart';
 import 'widgets_screen/login_header.dart';
+import 'package:winbin/screens/login_screens/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,7 +18,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _userController = TextEditingController();
-  final  _passwordController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isPasswordObscured = true;
   bool _isLoading = false;
 
@@ -195,7 +196,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     backgroundColor: const Color(0xFFFF9999),
                     textColor: const Color(0xFF800000),
                     iconColor: const Color(0xFF800000),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => const RegisterScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 25),
 
