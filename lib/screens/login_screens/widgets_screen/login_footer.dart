@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class _FooterText extends StatelessWidget {
-  const _FooterText();
+class FooterText extends StatelessWidget {
+  const FooterText();
 
   @override
   Widget build(BuildContext context) {

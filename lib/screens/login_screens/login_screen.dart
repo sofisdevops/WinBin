@@ -131,10 +131,10 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const _HeaderTitle(),
+                  const HeaderTitle(),
                   const SizedBox(height: 25),
 
-                  _CustomTextField(
+                  CustomTextField(
                     label: 'USUARIO',
                     hintText: 'Ingresa tu Documento',
                     controller: _userController,
@@ -153,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  _CustomTextField(
+                  CustomTextField(
                     label: 'CONTRASEÑA',
                     hintText: '••••••••',
                     controller: _passwordController,
@@ -179,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ? const Center(
                           child: CircularProgressIndicator(color: Colors.green),
                         )
-                      : _CustomButton(
+                      : CustomButton(
                           text: 'RECICLA',
                           icon: Icons.recycling,
                           backgroundColor: const Color(0xFF66BB6A),
@@ -189,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                   const SizedBox(height: 15),
 
-                  _CustomButton(
+                  CustomButton(
                     text: 'CREAR CUENTA',
                     icon: Icons.person_add_outlined,
                     backgroundColor: const Color(0xFFFF9999),
@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Divider(color: Colors.grey, thickness: 1),
                   const SizedBox(height: 10),
 
-                  const _FooterText(),
+                  const FooterText(),
                 ],
               ),
             ),
