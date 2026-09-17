@@ -65,6 +65,25 @@ class AuthService {
       return null;
     }
   }
+  Future<List<Curso>?> getCursos() async {
+    final url = Uri.parse('$baseUrl/cursos');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        print('cursos obtenidos : ${response.statusCode}');
+        return jsonList.map((json) => Curso.fromJson(json)).toList();
+      } else {
+        print('Error al obtener cursos: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Excepción al obtener cursos: $e');
+      return null;
+    }
+  }
 
  
 
@@ -125,6 +144,7 @@ class AuthService {
     String nombre,
     int cursoId,
     String contrasenna,
+    String? avatarUrl,
   ) async {
     final url = Uri.parse('$baseUrl/usuarios/registro');
 
@@ -137,6 +157,7 @@ class AuthService {
           'nombre': nombre,
           'curso': {'id_curso': cursoId},
           'contrasenna': contrasenna,
+          'avatarUrl': avatarUrl ?? "",
         }),
       );
 

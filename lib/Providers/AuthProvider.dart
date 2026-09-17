@@ -98,6 +98,7 @@ class AuthProvider extends ChangeNotifier {
     required String nombre,
     required int cursoId,
     required String contrasenna,
+    String avatarUrl = ""
   }) async {
     _setCargando(true);
     try {
@@ -106,6 +107,7 @@ class AuthProvider extends ChangeNotifier {
         nombre,
         cursoId,
         contrasenna,
+        avatarUrl,
       );
 
       _setCargando(false);
@@ -114,6 +116,9 @@ class AuthProvider extends ChangeNotifier {
       _setCargando(false);
       return false;
     }
+  }
+  Future<List<Curso>?> cargarCursos() async {
+    return await _authService.getCursos();
   }
 
 

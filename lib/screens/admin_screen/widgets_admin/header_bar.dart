@@ -10,9 +10,29 @@ class HeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final usuario = authProvider.usuarioActual;
+
+    if (usuario == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        color: const Color(0xFFEEF7E8),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF2E7D32)),
+            ),
+          ],
+        ),
+      );
+    }
+
+
+    final bool tieneAvatar = usuario.avatarUrl.trim().isNotEmpty;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      color: const Color(0xFEEF7E8),
+      color: const Color(0xFFEEF7E8),
       child: Row(
         children: [
           Expanded(
@@ -37,16 +57,23 @@ class HeaderBar extends StatelessWidget {
           ),
           IconButton(onPressed: () {}, icon: const Icon(Icons.help_outline)),
           const SizedBox(width: 10),
-          const CircleAvatar(
+          CircleAvatar(
             backgroundColor: Color(0xFF2E7D32),
-            child: Text('A', style: TextStyle(color: Colors.white)),
+            backgroundImage: tieneAvatar ? NetworkImage(usuario.avatarUrl) : null,
+            child: !tieneAvatar 
+                ? Text(
+                    usuario.nombre.isNotEmpty ? usuario.nombre[0].toUpperCase() : 'A', 
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  )
+                : null,
+            
           ),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                usuario!.rol,
+                usuario.rol,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
