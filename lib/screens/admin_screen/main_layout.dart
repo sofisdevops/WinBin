@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:winbin/screens/admin_screen/gestion_puntos_view.dart';
+import 'package:winbin/screens/admin_screen/gestion_usuarios_view.dart';
 import 'configuracion_reglas_view.dart';
 import 'periodos_view.dart';
 import 'ranking_filtros_view.dart';
@@ -23,7 +24,7 @@ class _MainLayoutState extends State<MainLayout> {
     ConfiguracionReglasView(),
     PeriodosView(),
     RankingView(),
-    Center(child: Text('Vista: Gestión de Usuarios')),
+    GestionUsuariosView()
   ];
 
   Future<void> _cerrarSesion() async {

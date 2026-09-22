@@ -5,7 +5,7 @@ import 'package:winbin/models/auth_model.dart';
 
 
 
-class AuthProvider extends ChangeNotifier {
+ class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 

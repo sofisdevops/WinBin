@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/admin_screen/main_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
+import 'Providers/UsuarioProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/screens/login_screens/login_screen.dart';
 void main() async{
@@ -10,6 +11,13 @@ void main() async{
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProxyProvider<AuthProvider, UsuarioProvider>(
+      create: (context) => UsuarioProvider(),
+      update: (context, authProvider, usuarioProvider) {
+        // Le pasas el token de AuthProvider a tu UsuarioProvider
+        return usuarioProvider!..updateToken(authProvider.token);
+      },
+    ),
     ],child: const MiAppWeb(),)
   );
 }
