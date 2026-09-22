@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:winbin/screens/admin_screen/gestion_puntos_view.dart';
 import 'configuracion_reglas_view.dart';
 import 'periodos_view.dart';
+import 'ranking_filtros_view.dart';
 import 'widgets_admin/header_bar.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +22,7 @@ class _MainLayoutState extends State<MainLayout> {
     GestionPuntosView(),
     ConfiguracionReglasView(),
     PeriodosView(),
-    Center(child: Text('Vista: Ranking & Filtros')),
+    RankingView(),
     Center(child: Text('Vista: Gestión de Usuarios')),
   ];
 
@@ -87,7 +88,7 @@ class _MainLayoutState extends State<MainLayout> {
                 _buildNavItem(0, Icons.stars, 'Gestión de Puntos'),
                 _buildNavItem(1, Icons.rule, 'Configuración de Reglas'),
                 _buildNavItem(2, Icons.calendar_today, 'Periodos'),
-                _buildNavItem(3, Icons.bar_chart, 'Ranking & Filtros'),
+                _buildNavItem(3, Icons.bar_chart, 'Ranking'),
                 _buildNavItem(4, Icons.people, 'Gestión de Usuarios'),
                 const Spacer(),
                 _buildNavItem(5, Icons.settings, 'Ajustes', isAction: true),
