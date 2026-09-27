@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:winbin/models/auth_model.dart';
-import 'package:winbin/screens/login_screens/login_screen.dart';
+import 'package:go_router/go_router.dart';
 
 import 'widgets_screen/custom_button.dart';
 import 'widgets_screen/custom_text.dart';
@@ -188,11 +188,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
-          (route) => false,
-        );
+        context.go('/login');
       } else {
         _mostrarError('Error al registrar. Verifica los datos.');
       }
@@ -453,7 +449,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     backgroundColor: const Color(0xFFFF9999),
                     textColor: const Color(0xFF800000),
                     iconColor: const Color(0xFF800000),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => context.go('/login'),
                   ),
                   const SizedBox(height: 20),
 

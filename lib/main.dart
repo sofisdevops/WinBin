@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/admin_screen/main_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:winbin/screens/user_screen/responsive_layout.dart';
 import 'Providers/UsuarioProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/screens/login_screens/login_screen.dart';
@@ -30,11 +30,11 @@ class MiAppWeb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'WIN BIN :D',
       theme: ThemeData(fontFamily: 'Courier'),
-      home: LoginScreen(),
+      routerConfig: _router,
     );
   }
 }
