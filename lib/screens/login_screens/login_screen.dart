@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        context.go('/admin');
+        context.go('/home');
       } else {
         _mostrarError('Credenciales incorrectas');
       }
