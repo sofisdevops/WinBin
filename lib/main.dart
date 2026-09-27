@@ -111,6 +111,8 @@ void main() async{
       ],
       child: MiAppWeb(router: router),
     ),
+    ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
+    ],child: const MiAppWeb(),)
   );
 }
 
