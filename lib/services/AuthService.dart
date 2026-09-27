@@ -155,7 +155,7 @@ class AuthService {
         body: jsonEncode({
           'documento': documento,
           'nombre': nombre,
-          'curso': {'id_curso': cursoId},
+          'id_curso': cursoId,
           'contrasenna': contrasenna,
           'avatarUrl': avatarUrl ?? "",
         }),

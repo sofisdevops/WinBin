@@ -453,7 +453,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     backgroundColor: const Color(0xFFFF9999),
                     textColor: const Color(0xFF800000),
                     iconColor: const Color(0xFF800000),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LoginScreen(),
+                      ),
+                      (route) => false,
+                    ),
                   ),
                   const SizedBox(height: 20),
 
