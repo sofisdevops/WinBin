@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:winbin/models/auth_model.dart';
 import 'package:winbin/models/session_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:winbin/utils/api_exceptions.dart';
 
 
 class AuthService {
@@ -17,7 +18,10 @@ class AuthService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'documento': documento, 'contrasenna': contrasenna}),
       );
-
+      
+      if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      }
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         print('Login exitoso');
@@ -52,6 +56,10 @@ class AuthService {
         }),
       );
 
+      if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      }
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         print('Detalle de sesión creado/obtenido con éxito: ${response.statusCode}');
@@ -70,6 +78,10 @@ class AuthService {
 
     try {
       final response = await http.get(url);
+
+      if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      }
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
@@ -98,6 +110,9 @@ class AuthService {
         'Authorization': 'Bearer $token',
       }
       );
+      if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      }
 
       if (response.statusCode == 200) {
         print('perfiles obtenidos :${response.statusCode}');
@@ -124,6 +139,9 @@ class AuthService {
         'Authorization': 'Bearer $token',
       },
       );
+      if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -160,7 +178,9 @@ class AuthService {
           'avatarUrl': avatarUrl ?? "",
         }),
       );
-
+        if (response.statusCode == 401) {
+          throw UnauthorizedException();
+      }
       if (response.statusCode == 201 || response.statusCode == 200) {
         print('Usuario registrado con éxito');
         return true;

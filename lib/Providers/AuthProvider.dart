@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:winbin/services/AuthService.dart';
 import 'package:winbin/models/auth_model.dart';
+import 'package:winbin/utils/api_exceptions.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
-
-
- class AuthProvider extends ChangeNotifier {
+class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -24,32 +24,40 @@ import 'package:winbin/models/auth_model.dart';
   String? _idSesion;
   String? get idSesion => _idSesion;
 
-  String? get rol => _usuarioActual?.rol; 
+  String? get rol => _usuarioActual?.rol;
 
   UsuarioPerfil? _usuarioActual;
   UsuarioPerfil? get usuarioActual => _usuarioActual;
 
   static const String _keyToken = 'jwt_token';
 
+  bool get isLoggedIn {
+    if (_token == null) return false;
+    return !JwtDecoder.isExpired(_token!);
+  }
+
   Future<bool> iniciarSesion(String documento, String contrasenna) async {
     _setCargando(true);
 
     try {
-      final LoginResponse? loginResponse = await _authService.login(documento, contrasenna);
+      final LoginResponse? loginResponse = await _authService.login(
+        documento,
+        contrasenna,
+      );
 
       if (loginResponse != null && loginResponse.token.isNotEmpty) {
         _token = loginResponse.token;
         await _storage.write(key: _keyToken, value: _token);
 
-        final periodo  = await cargarPeriodo();
+        final periodo = await cargarPeriodo();
 
         if (periodo != null) {
           _nombrePeriodo = periodo.nombrePeriodo;
           _idPeriodo = periodo.idPeriodo;
         }
-        
+
         if (_idPeriodo != null && _token != null) {
-        final  sesionData = await _authService.detalleSession(
+          final sesionData = await _authService.detalleSession(
             documento: documento,
             idPeriodo: _idPeriodo!,
             token: _token!,
@@ -85,11 +93,13 @@ import 'package:winbin/models/auth_model.dart';
       final perfil = await _authService.obtenerPerfil(token: tokenActual);
 
       if (perfil != null) {
-        _usuarioActual = perfil;  
-        notifyListeners();       
+        _usuarioActual = perfil;
+        notifyListeners();
       } else {
         print("No se pudo obtener el perfil desde AuthService.");
       }
+    } on UnauthorizedException {
+      await logout();
     } catch (e) {
       print("Error al recargar el perfil del usuario: $e");
     }
@@ -100,7 +110,7 @@ import 'package:winbin/models/auth_model.dart';
     required String nombre,
     required int cursoId,
     required String contrasenna,
-    String avatarUrl = ""
+    String avatarUrl = "",
   }) async {
     _setCargando(true);
     try {
@@ -119,10 +129,10 @@ import 'package:winbin/models/auth_model.dart';
       return false;
     }
   }
+
   Future<List<Curso>?> cargarCursos() async {
     return await _authService.getCursos();
   }
-
 
   Future<Periodo?> cargarPeriodo() async {
     String? tokenActual = await obtenerToken();
@@ -132,17 +142,47 @@ import 'package:winbin/models/auth_model.dart';
       return null;
     }
 
-    final response = await _authService.getPeriodo(token: tokenActual);
-    if (response != null ) {
-      return response;
+    try {
+      final response = await _authService.getPeriodo(token: tokenActual);
+      if (response != null) {
+        return response;
+      }
+      return null;
+    } on UnauthorizedException {
+      await logout();
+      return null;
+    } catch (e) {
+      print("Error al recargar el perfil del usuario: $e");
+      return null;
     }
-    return null;
   }
 
   Future<String?> obtenerToken() async {
     if (_token != null) return _token;
     _token = await _storage.read(key: _keyToken);
     return _token;
+  }
+
+  Future<void> checkLoginStatus() async {
+    _token = await _storage.read(key: _keyToken);
+
+    if (_token != null) {
+      if (JwtDecoder.isExpired(_token!)) {
+        print("El token ya expiró localmente. No consultamos al backend.");
+        await logout();
+        return;
+      }
+
+      final periodo = await cargarPeriodo();
+      if (periodo != null) {
+        _nombrePeriodo = periodo.nombrePeriodo;
+        _idPeriodo = periodo.idPeriodo;
+      }
+      await obtenerPerfilUsuario();
+      notifyListeners();
+    } else {
+      notifyListeners();
+    }
   }
 
   Future<void> logout() async {

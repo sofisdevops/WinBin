@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../services/TableServices.dart';
 import '../models/users_model.dart';
+import 'package:winbin/utils/api_exceptions.dart';
 
 class UsuarioProvider extends ChangeNotifier {
   final Tableservices _apiService = Tableservices();
@@ -33,7 +34,8 @@ class UsuarioProvider extends ChangeNotifier {
         fromjson: (json) => Usuario.fromJson(json),
         token: _token,
       );
-    
+    } on UnauthorizedException {
+      rethrow;
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
