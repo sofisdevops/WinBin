@@ -5,6 +5,7 @@ import 'package:winbin/Providers/AuthProvider.dart';
 import 'Providers/UsuarioProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/screens/login_screens/login_screen.dart';
+import 'Providers/Gestion_puntos_provider.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
@@ -17,7 +18,9 @@ void main() async{
         // Le pasas el token de AuthProvider a tu UsuarioProvider
         return usuarioProvider!..updateToken(authProvider.token);
       },
+      
     ),
+    ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
     ],child: const MiAppWeb(),)
   );
 }
