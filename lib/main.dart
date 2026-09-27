@@ -8,6 +8,7 @@ import 'package:winbin/screens/login_screens/login_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:winbin/screens/admin_screen/main_layout.dart';
 import 'package:winbin/screens/login_screens/register_screen.dart';
+import 'Providers/Gestion_puntos_provider.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey =
@@ -84,7 +85,8 @@ class AppRouterSetup {
   }
 }
 
-void main() async {
+
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
