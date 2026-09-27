@@ -24,6 +24,8 @@ import 'package:winbin/models/auth_model.dart';
   String? _idSesion;
   String? get idSesion => _idSesion;
 
+  String? get rol => _usuarioActual?.rol; 
+
   UsuarioPerfil? _usuarioActual;
   UsuarioPerfil? get usuarioActual => _usuarioActual;
 

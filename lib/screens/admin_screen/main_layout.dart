@@ -7,7 +7,7 @@ import 'ranking_filtros_view.dart';
 import 'widgets_admin/header_bar.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
-import 'package:winbin/screens/login_screens/login_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -31,11 +31,7 @@ class _MainLayoutState extends State<MainLayout> {
     await context.read<AuthProvider>().logout();
 
     if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
+      context.go('/login');
     }
   }
 
