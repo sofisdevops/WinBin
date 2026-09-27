@@ -13,87 +13,108 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey =
     GlobalKey<NavigatorState>();
 
-final GoRouter _router = GoRouter(
-  navigatorKey: _rootNavigatorKey,
-  initialLocation: '/login',
-  redirect: (context, state) {
-    final authProvider = context.read<AuthProvider>();
-    final bool estaLogueado = authProvider.token != null;
-    final bool vaAVistaPublica =
-        state.uri.path == '/login' || state.uri.path == '/register';
-
-    if (!estaLogueado && !vaAVistaPublica) {
-      return '/login';
-    }
-
-    if (estaLogueado && vaAVistaPublica) {
-      return authProvider.rol == 'ADMIN' ? '/admin' : '/home';
-    }
-
-    return null;
-  },
-  routes: [
-    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-    GoRoute(
-      path: '/register',
-      builder: (context, state) => const RegisterScreen(),
-    ),
-    GoRoute(
-      path: '/admin',
-      builder: (context, state) => const MainLayout(),
+class AppRouterSetup {
+  static GoRouter createRouter(AuthProvider authProvider) {
+    return GoRouter(
+      navigatorKey: _rootNavigatorKey,
+      initialLocation: '/login',
       redirect: (context, state) {
-        final authProvider = context.read<AuthProvider>();
-        if (authProvider.rol != 'ADMIN') {
-          return '/home';
+        final bool estaLogueado = authProvider.token != null;
+        final bool vaAVistaPublica =
+            state.uri.path == '/login' || state.uri.path == '/register';
+
+        if (!estaLogueado && !vaAVistaPublica) {
+          return '/login';
         }
+
+        if (estaLogueado && vaAVistaPublica) {
+          return authProvider.rol == 'ADMIN' ? '/admin' : '/home';
+        }
+
         return null;
       },
-    ),
-    ShellRoute(
-      navigatorKey: _shellNavigatorKey,
-      builder: (context, state, child) => ResponsiveLayout(child: child),
       routes: [
         GoRoute(
-          path: '/home',
-          builder: (context, state) =>
-              const Scaffold(body: Center(child: Text('Vista Home'))),
+          path: '/login',
+          builder: (context, state) => const LoginScreen(),
         ),
         GoRoute(
-          path: '/ranking',
-          builder: (context, state) =>
-              const Scaffold(body: Center(child: Text('Vista Ranking'))),
+          path: '/register',
+          builder: (context, state) => const RegisterScreen(),
         ),
         GoRoute(
-          path: '/perfil',
-          builder: (context, state) =>
-              const Scaffold(body: Center(child: Text('Vista Perfil'))),
+          path: '/admin',
+          builder: (context, state) => const MainLayout(),
+          redirect: (context, state) {
+            final authProvider = context.read<AuthProvider>();
+            if (authProvider.rol != 'ADMIN') {
+              return '/home';
+            }
+            return null;
+          },
+        ),
+        ShellRoute(
+          navigatorKey: _shellNavigatorKey,
+          builder: (context, state, child) => ResponsiveLayout(child: child),
+          routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) =>
+                  const Scaffold(body: Center(child: Text('Vista Home'))),
+            ),
+            GoRoute(
+              path: '/ranking',
+              builder: (context, state) =>
+                  const Scaffold(body: Center(child: Text('Vista Ranking'))),
+            ),
+            GoRoute(
+              path: '/perfil',
+              builder:
+                  (context, state) {
+                        return const Scaffold(
+                          body: Center(child: Text('Vista Perfil')),
+                        );
+                      }
+                      as Widget Function(BuildContext, GoRouterState),
+            ),
+          ],
         ),
       ],
-    ),
-  ],
-);
+    );
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+
+  final authProvider = AuthProvider();
+  await authProvider.obtenerToken();
+  if (authProvider.token != null) {
+    await authProvider.obtenerPerfilUsuario();
+  }
+
+  final router = AppRouterSetup.createRouter(authProvider);
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProxyProvider<AuthProvider, UsuarioProvider>(
           create: (context) => UsuarioProvider(),
           update: (context, authProvider, usuarioProvider) {
-            // Le pasas el token de AuthProvider a tu UsuarioProvider
             return usuarioProvider!..updateToken(authProvider.token);
           },
         ),
       ],
-      child: const MiAppWeb(),
+      child: MiAppWeb(router: router),
     ),
   );
 }
 
 class MiAppWeb extends StatelessWidget {
-  const MiAppWeb({super.key});
+  final GoRouter router;
+  const MiAppWeb({super.key, required this.router});
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +122,7 @@ class MiAppWeb extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'WIN BIN :D',
       theme: ThemeData(fontFamily: 'Courier'),
-      routerConfig: _router,
+      routerConfig: router,
     );
   }
 }
