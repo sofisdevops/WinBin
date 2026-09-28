@@ -8,7 +8,7 @@ import 'package:winbin/screens/login_screens/login_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:winbin/screens/admin_screen/main_layout.dart';
 import 'package:winbin/screens/login_screens/register_screen.dart';
-import 'Providers/Gestion_puntos_provider.dart';
+import 'Providers/gestion_puntos_provider.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey =
@@ -108,11 +108,10 @@ void main() async{
             return usuarioProvider!..updateToken(authProvider.token);
           },
         ),
+        ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
       ],
       child: MiAppWeb(router: router),
     ),
-    ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
-    ],child: const MiAppWeb(),)
   );
 }
 
