@@ -7,12 +7,18 @@ class Tablagenerica<T> extends DataTableSource {
   final List<Widget Function(T item)> cellBuilders;
   final Function(T item)? onEdit;
   final Function(T item)? onDelete;
+  final Function(T item)? active;
+  final Function(T item)? desactive;
+  final bool Function(T item)? isRowActive;
 
   Tablagenerica({
     required this.data,
     required this.cellBuilders,
     this.onEdit,
     this.onDelete,
+    this.active,
+    this.desactive,
+    this.isRowActive
   });
 
   @override
@@ -35,11 +41,38 @@ class Tablagenerica<T> extends DataTableSource {
               if (onEdit != null)
                 IconButton(
                   icon: const Icon(Icons.edit, color: Colors.blue),
+                  tooltip: "editar",
                   onPressed: () => onEdit!(item),
                 ),
+              if (isRowActive != null) ...[
+                if (isRowActive!(item)) ...[
+                  if (desactive != null)
+                    IconButton(
+                      icon: const Icon(
+                        Icons.bedtime_off_outlined,
+                        color: Color.fromARGB(255, 255, 0, 0),
+                      ),
+                      tooltip: 'Desactivar',
+                      onPressed: () => desactive!(item),
+                    ),
+                ] else ...[
+                  if (active != null)
+                    IconButton(
+                      icon: const Icon(
+                        Icons.wb_sunny_outlined,
+                        color: Colors.green,
+                      ),
+                      tooltip: 'Activar',
+                      onPressed: () =>active!(item),
+                    ),
+                ],
+              ],
+
+              // 3. Botón Eliminar Definitivamente (Trash/Delete)
               if (onDelete != null)
                 IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  tooltip: 'Eliminar',
                   onPressed: () => onDelete!(item),
                 ),
             ],
@@ -76,6 +109,9 @@ class GenericTable<T> extends StatelessWidget {
   final Function(T item)? onEdit;
   final Function(T item)? onDelete;
   final int rowsPerPage;
+  final Function(T item)? active;
+  final Function(T item)? desactive;
+  final bool Function(T item)? isRowActive;
 
   const GenericTable({
     super.key,
@@ -86,6 +122,9 @@ class GenericTable<T> extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.rowsPerPage = 5,
+    this.active,
+    this.desactive,
+    this.isRowActive
   });
 
   @override
@@ -99,16 +138,19 @@ class GenericTable<T> extends StatelessWidget {
       cellBuilders: cellBuilders,
       onEdit: onEdit,
       onDelete: onDelete,
+      active: active,
+      desactive: desactive,
+      isRowActive: isRowActive
     );
 
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(
-          dragDevices: {
-            PointerDeviceKind.touch,
-            PointerDeviceKind.mouse,
-            PointerDeviceKind.trackpad,
-          },
-        ),
+        dragDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.trackpad,
+        },
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(

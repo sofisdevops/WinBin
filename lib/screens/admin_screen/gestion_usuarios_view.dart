@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:winbin/models/auth_model.dart';
 import 'package:winbin/screens/admin_screen/widgets_admin/tablaGenerica.dart';
 import '../../Providers/UsuarioProvider.dart';
 import '../../models/users_model.dart';
@@ -68,7 +70,8 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                     columns: const [
                       'Documento',
                       'Nombre',
-                      'IDCurso',
+                      'Activo',
+                      'Curso',
                       'Puntos',
                       'Rol',
                       'AvatarUrl',
@@ -77,7 +80,8 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                     cellBuilders: [
                       (user) => Text(user.documento),
                       (user) => Text(user.nombre),
-                      (user) => Text(user.curso.toString()),
+                      (user) => Text(user.activo.toString()),
+                      (user) => Text(user.curso?.nombre ?? 'sin Curso'),
                       (user) => Text(user.puntos.toString()),
                       (user) => Text(user.rol),
                       (user) => SizedBox(
@@ -92,16 +96,141 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                       ),
                     ],
                     onEdit: (user) {
-                      // Abrir modal o navegar
+                      // Abrir el modal
+                      _showEditDialog(context, user);
                     },
-                    onDelete: (user) {
-                      // Eliminar usuario
+                    onDelete: null,
+                    desactive: (user) {
+                      context.read<UsuarioProvider>().desactivar(
+                        user.documento,
+                      );
                     },
+                    active: (user) {
+                      context.read<UsuarioProvider>().activarUsuario(
+                        user.documento,
+                      );
+                    },
+                    isRowActive: (item) => item.activo,
                   ),
                 ],
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showEditDialog(BuildContext context, Usuario usuario) {
+    final controllerNameUser = TextEditingController(text: usuario.nombre);
+
+    final controllerPuntosUser = TextEditingController(
+      text: usuario.puntos.toString(),
+    );
+    final controllerRolUser = TextEditingController(text: usuario.rol);
+    Curso? cursoSeleccionado = usuario.curso;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Editar usuario ${usuario.nombre}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controllerNameUser,
+                decoration: InputDecoration(labelText: 'Nombre'),
+              ),
+              const SizedBox(height: 10),
+
+              FutureBuilder<List<Curso>?>(
+                future: context.read<AuthProvider>().cargarCursos(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+
+                  if (snapshot.hasError) {
+                    return Text('Error al cargar cursos: ${snapshot.error}');
+                  }
+
+                  final cursosDisponibles = snapshot.data ?? [];
+
+                  Curso? cursoSeleccionado = cursosDisponibles.firstWhere(
+                    (c) => c.id_curso == usuario.curso?.id_curso,
+                    orElse: () => cursosDisponibles
+                        .first, // Valor por defecto si no lo encuentra
+                  );
+
+                  return DropdownButtonFormField<Curso>(
+                    initialValue: cursoSeleccionado,
+                    decoration: const InputDecoration(labelText: 'Curso'),
+                    items: cursosDisponibles.map((curso) {
+                      return DropdownMenuItem<Curso>(
+                        value: curso,
+                        child: Text(
+                          curso.nombre,
+                        ), // Cambia 'nombre' si tu clase Curso usa otro atributo
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      cursoSeleccionado = val;
+                    },
+                  );
+                },
+              ),
+
+              const SizedBox(height: 10),
+              TextField(
+                controller: controllerPuntosUser,
+                decoration: InputDecoration(labelText: 'Puntos'),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: controllerRolUser,
+                decoration: InputDecoration(labelText: 'Rol'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2E7D32),
+              ),
+              onPressed: () async {
+                final usuarioActualizado = usuario.copyWith(
+                  nombre: controllerNameUser.text,
+                  curso: cursoSeleccionado,
+                  puntos:
+                      int.tryParse(controllerPuntosUser.text) ?? usuario.puntos,
+                  rol: controllerRolUser.text,
+                );
+
+                // Llamar al provider
+                final exito = await context
+                    .read<UsuarioProvider>()
+                    .actualizarUsuario(usuarioActualizado);
+
+                if (exito && context.mounted) {
+                  Navigator.pop(context); // Cerrar diálogo
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Usuario actualizado correctamente'),
+                    ),
+                  );
+                }
+              },
+              child: const Text(
+                'Guardar',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
         );
       },
     );

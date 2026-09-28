@@ -56,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _cursos = cursosData!;
 
         if (_cursos != null && _cursos!.isNotEmpty) {
-          _cursoSeleccionadoId = _cursos!.first.idCurso;
+          _cursoSeleccionadoId = _cursos!.first.id_curso;
         }
 
         _isLoadingCursos = false;
@@ -373,7 +373,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               items: _cursos?.map((Curso curso) {
                                 return DropdownMenuItem<int>(
-                                  value: curso.idCurso,
+                                  value: curso.id_curso,
                                   child: Text(curso.nombre),
                                 );
                               }).toList(),

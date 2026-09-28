@@ -28,4 +28,59 @@ class Tableservices {
       throw Exception('Error al cargar datos desde $endpoint');
     }
   }
+
+  Future<bool> actualizarUsuario({
+    required String endpoint,
+    required String documento,
+    required String? token,
+    required Map<String, dynamic> data,
+  }) async {
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+
+    final actualizar = await http.put(
+      Uri.parse('$baseUrl/$endpoint/$documento'),
+      headers: headers,
+      body: jsonEncode(data),
+    );
+    print('este es el token ${token} ');
+    print('datos recubidos ${data}, y este es la respuest del back ${actualizar.body}');
+    return actualizar.statusCode == 200;
+  }
+
+  Future<bool> eliminarElemnto(
+    String endponit,
+    dynamic documento,
+    String? token,
+  ) async {
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+
+    final response = await http.delete(
+      Uri.parse('$baseUrl/$endponit/$documento'),
+      headers: headers,
+    );
+    return response.statusCode == 200;
+  }
+
+  Future<bool> activarUsuario(
+    String endponit,
+    dynamic documento,
+    String? token,
+  ) async {
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/$endponit/$documento/reactivar'),
+      headers: headers,
+    );
+    return response.statusCode == 200;
+  }
 }
