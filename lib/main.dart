@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:winbin/screens/admin_screen/main_layout.dart';
 import 'package:winbin/screens/login_screens/register_screen.dart';
 import 'Providers/gestion_puntos_provider.dart';
+import 'Providers/auditoria_provider.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey =
@@ -109,6 +110,7 @@ void main() async{
           },
         ),
         ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
+        ChangeNotifierProvider(create: (_) => AuditoriaProvider()),
       ],
       child: MiAppWeb(router: router),
     ),
