@@ -31,5 +31,41 @@ class Usuario {
     );
   }
 
+
+  Map<String, dynamic> toJson() {
+    return {
+      'activo':activo,
+      'avatarUrl':(avatarUrl != null && avatarUrl!.isNotEmpty) ? avatarUrl : null,
+      'curso':{
+        'id_curso':curso?.id_curso
+        },
+      'documento': documento,
+      'nombre': nombre,
+      'puntos':puntos,
+      'rol':rol
+    };
+  }
+
+  // Permite clonar el objeto cambiando solo algunos campos
+  Usuario copyWith({
+    bool? activo,
+    String? avatarUrl,
+    Curso? curso,
+    int? puntos,
+    String? rol,
+    String? documento,
+     String? nombre,
+      String? email}) {
+    return Usuario(
+      activo: activo ?? this.activo,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      curso: curso ?? this.curso,
+      documento: documento ?? this.documento,
+      nombre: nombre ?? this.nombre,
+      puntos: puntos ?? this.puntos,
+      rol: rol ?? this.rol
+    );
+  }
+
   
 }

@@ -34,13 +34,70 @@ class UsuarioProvider extends ChangeNotifier {
         fromjson: (json) => Usuario.fromJson(json),
         token: _token,
       );
+
     } on UnauthorizedException {
       rethrow;
+
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> actualizarUsuario(Usuario usuarioEditado) async {
+    try {
+      final usuarios = await _apiService.actualizarUsuario(
+        endpoint: 'usuarios',
+        documento: usuarioEditado.documento,
+        token: _token,
+        data: usuarioEditado.toJson(),
+      );
+      if (usuarios) {
+        // Encontrar la posición del usuario en la lista local y reemplazarlo
+        final index = _usuarios.indexWhere((u) => u.documento == usuarioEditado.documento);
+        if (index != -1) {
+          _usuarios[index] = usuarioEditado;
+          notifyListeners(); // <-- Esto actualiza la tabla genérica automáticamente
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error al actualiza $e');
+      return false;
+    }
+  }
+
+  Future<void> desactivar(String documento) async {
+    final usuarios = await _apiService.eliminarElemnto(
+      'usuarios',
+      documento,
+      _token,
+    );
+
+    if (usuarios) {
+      final index = _usuarios.indexWhere((u) => u.documento == documento);
+      if (index != -1) {
+        _usuarios[index] = _usuarios[index].copyWith(activo: false);
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> activarUsuario(String documento) async {
+    final activarUsuario = await _apiService.activarUsuario(
+      'usuarios',
+      documento,
+      _token,
+    );
+    if (activarUsuario) {
+      final index = _usuarios.indexWhere((u) => u.documento == documento);
+      if (index != -1) {
+        _usuarios[index] = _usuarios[index].copyWith(activo: true);
+        notifyListeners();
+      }
     }
   }
 }
