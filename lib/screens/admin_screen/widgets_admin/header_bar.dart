@@ -34,7 +34,7 @@ class HeaderBar extends StatelessWidget {
     final bool tieneAvatar = usuario.avatarUrl.trim().isNotEmpty;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: const Color(0xFFEEF7E8),
+      color: const Color(0xFFF7EFD8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -43,7 +43,7 @@ class HeaderBar extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Buscar...',
                 prefixIcon: const Icon(Icons.search, size: 20),
-                fillColor: const Color(0xFFDCEDC8),
+                fillColor: const Color(0xFFF5DB90),
                 filled: true,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 border: OutlineInputBorder(

@@ -45,8 +45,8 @@ class _MainLayoutState extends State<MainLayout> {
       body: Row(
         children: [
           Container(
-            width: 250,
-            color: const Color(0xFF66BB6A),
+            width: 220,
+            color: const Color.fromARGB(255, 51, 122, 55),
             child: Column(
               children: [
                 const SizedBox(height: 30),
