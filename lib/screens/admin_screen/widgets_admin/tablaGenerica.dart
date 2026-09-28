@@ -47,7 +47,15 @@ class Tablagenerica<T> extends DataTableSource {
         ),
       );
     }
-    return DataRow(cells: cells);
+
+    // para los colores intercalados
+    final esPar = index % 2 == 0;
+    final colorFondo = esPar ? const Color(0xFFF4F4F3) : const Color(0xFFEDECE8);
+
+    return DataRow(
+      color: WidgetStateProperty.all(colorFondo),
+      cells: cells,
+    );
   }
 
   @override
@@ -111,8 +119,17 @@ class GenericTable<T> extends StatelessWidget {
           child: PaginatedDataTable(
             header: Text(title),
             rowsPerPage: rowsPerPage,
+            headingRowColor: WidgetStateProperty.all(const Color(0xFFD06E4B)),
             columns: allColumns
-                .map((col) => DataColumn(label: Text(col)))
+                .map((col) => DataColumn(
+                      label: Text(
+                        col,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ))
                 .toList(),
             source: source,
           ),
