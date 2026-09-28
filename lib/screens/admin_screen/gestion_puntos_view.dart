@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:winbin/Providers/Gestion_puntos_provider.dart';
+import 'package:winbin/Providers/gestion_puntos_provider.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 
 class GestionPuntosView extends StatelessWidget {
