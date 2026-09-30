@@ -30,6 +30,9 @@ class _HeaderBarState extends State<HeaderBar> {
     final authProvider = context.watch<AuthProvider>();
     final usuario = authProvider.usuarioActual;
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
     if (usuario == null) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -51,8 +54,12 @@ class _HeaderBarState extends State<HeaderBar> {
     }
 
     final bool tieneAvatar = usuario.avatarUrl.trim().isNotEmpty;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 8 : 16,
+        vertical: 12,
+      ),
       color: const Color(0xFFF7EFD8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -72,6 +79,7 @@ class _HeaderBarState extends State<HeaderBar> {
               ),
             ),
           ),
+          const SizedBox(width: 8),
           Flexible(
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -92,12 +100,7 @@ class _HeaderBarState extends State<HeaderBar> {
                     );
                   },
                 ),
-
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.help_outline),
-                ),
-                const SizedBox(width: 10),
+                SizedBox(width: isMobile ? 0 : 10),
                 CircleAvatar(
                   backgroundColor: Color(0xFF2E7D32),
                   backgroundImage: tieneAvatar
@@ -115,23 +118,28 @@ class _HeaderBarState extends State<HeaderBar> {
                         )
                       : null,
                 ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      usuario.rol,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                if (!isMobile) ...[
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        usuario.rol,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                    Text(
-                      usuario!.nombre,
-                      style: const TextStyle(color: Colors.grey, fontSize: 10),
-                    ),
-                  ],
-                ),
+                      Text(
+                        usuario.nombre,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -142,6 +150,9 @@ class _HeaderBarState extends State<HeaderBar> {
 }
 
 void _showNotifications(BuildContext context) {
+  final bool isMobile = MediaQuery.of(context).size.width < 600;
+  final Size size = MediaQuery.of(context).size;
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -154,16 +165,18 @@ void _showNotifications(BuildContext context) {
               onPressed: () {
                 context.read<AuditoriaProvider>().marcarTodasComoLeidas();
               },
-              child: const Text(
+              child: Text(
                 'Marcar todas leidas',
-                style: TextStyle(fontSize: 12),
+                style: TextStyle(
+                  fontSize: isMobile ? 10 : 12,
+                ),
               ),
             ),
           ],
         ),
         content: SizedBox(
-          width: 500,
-          height: 500,
+          width: isMobile ? size.width * 0.9 : 500,
+          height: size.height * 0.9,
           child: Consumer<AuditoriaProvider>(
             builder: (context, provider, child) {
               if (provider.eventos.isEmpty) {
@@ -201,6 +214,9 @@ void _showNotifications(BuildContext context) {
                         : Colors.blue.withOpacity(0.1),
                     elevation: estaLeida ? 1 : 0,
                     child: ListTile(
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 8 : 16,
+                      ),
                       leading: Icon(
                         Icons.circle,
                         size: 12,
@@ -212,6 +228,7 @@ void _showNotifications(BuildContext context) {
                           fontWeight: estaLeida
                               ? FontWeight.normal
                               : FontWeight.bold,
+                          fontSize: isMobile ? 14 : 16,
                         ),
                       ),
                       subtitle: Padding(
@@ -220,7 +237,10 @@ void _showNotifications(BuildContext context) {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${evento['usuario']} - Tabla: ${evento['tabla']}',
+                              'Usuario: ${evento['usuario'] ?? 'N/A'} - Tabla: ${evento['tabla'] ?? 'N/A'}',
+                              style: TextStyle(
+                                fontSize: isMobile ? 12 : 14,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Row(

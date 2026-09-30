@@ -80,21 +80,7 @@ class ResponsiveLayout extends StatelessWidget {
       ),
     ];
 
-    if (isAdmin) {
-      bottomItems.add(
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.admin_panel_settings),
-          label: 'Admin',
-        ),
-      );
-    }
 
-    bottomItems.add(
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.logout, color: Colors.redAccent),
-        label: 'Cerrar sesión',
-      ),
-    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
