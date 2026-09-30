@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:winbin/screens/profile_screen/profile_screen.dart';
 import 'screens/admin_screen/main_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
@@ -23,7 +24,7 @@ class MiAppWeb extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'WIN BIN :D',
       theme: ThemeData(fontFamily: 'Courier'),
-      home: LoginScreen(),
+      home: const ProfileScreen(),
     );
   }
 }
