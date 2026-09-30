@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:winbin/utils/api_exceptions.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:provider/provider.dart';
+import 'package:winbin/main.dart';
+
 class AuditoriaProvider with ChangeNotifier {
   StompClient? _stompClient;
   bool _isConnected = false;
@@ -77,7 +82,9 @@ class AuditoriaProvider with ChangeNotifier {
         ),
         headers: {'Authorization': 'Bearer $token'},
       );
-
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        throw UnauthorizedException();
+      }
       if (response.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(utf8.decode(response.bodyBytes));
         
@@ -115,7 +122,27 @@ class AuditoriaProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error cargando historial de auditoría: $e');
+      if (e is UnauthorizedException) {
+        debugPrint(e.mensaje); 
+        _forzarCierreDeSesion();
+      } else {
+        debugPrint('Error de red o parsing: $e');
+      }
+    }
+  }
+
+  void _forzarCierreDeSesion() {
+    final context = rootNavigatorKey.currentContext;
+    if (context != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tu sesión expiró. Vuelve a ingresar.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      
+      context.read<AuthProvider>().logout();
     }
   }
 }

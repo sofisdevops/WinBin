@@ -10,16 +10,18 @@ import 'package:winbin/screens/admin_screen/main_layout.dart';
 import 'package:winbin/screens/login_screens/register_screen.dart';
 import 'Providers/gestion_puntos_provider.dart';
 import 'Providers/auditoria_provider.dart';
+import 'Providers/dashboard_provider.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _shellNavigatorKey =
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> shellNavigatorKey =
     GlobalKey<NavigatorState>();
 
 class AppRouterSetup {
   static GoRouter createRouter(AuthProvider authProvider) {
     return GoRouter(
-      navigatorKey: _rootNavigatorKey,
+      navigatorKey: rootNavigatorKey,
       initialLocation: '/login',
+      refreshListenable: authProvider,
       redirect: (context, state) {
         final bool estaLogueado = authProvider.token != null;
         final bool vaAVistaPublica =
@@ -56,7 +58,7 @@ class AppRouterSetup {
           },
         ),
         ShellRoute(
-          navigatorKey: _shellNavigatorKey,
+          navigatorKey: shellNavigatorKey,
           builder: (context, state, child) => ResponsiveLayout(child: child),
           routes: [
             GoRoute(
@@ -111,6 +113,7 @@ void main() async{
         ),
         ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
         ChangeNotifierProvider(create: (_) => AuditoriaProvider()),
+        ChangeNotifierProvider(create: (_) => DashboardProvider()),
       ],
       child: MiAppWeb(router: router),
     ),

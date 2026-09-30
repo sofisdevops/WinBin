@@ -31,6 +31,7 @@ class AuthService {
         return null;
       }
     } catch (e) {
+      if(e is UnauthorizedException) rethrow;
       print('Error al iniciar sesión: $e');
       return null;
     }
@@ -69,6 +70,7 @@ class AuthService {
         return null;
       }
     } catch (e) {
+      if(e is UnauthorizedException) rethrow;
       print('Error al obtener detalles del usuario: $e');
       return null;
     }
@@ -79,7 +81,7 @@ class AuthService {
     try {
       final response = await http.get(url);
 
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 ) {
         throw UnauthorizedException();
       }
 
@@ -92,6 +94,7 @@ class AuthService {
         return null;
       }
     } catch (e) {
+      if(e is UnauthorizedException) rethrow;
       print('Excepción al obtener cursos: $e');
       return null;
     }
@@ -122,6 +125,7 @@ class AuthService {
         return null;
       }
     } catch (e) {
+      if(e is UnauthorizedException) rethrow;
       print('Excepción al obtener perfil: $e');
       return null;
     }
@@ -152,6 +156,7 @@ class AuthService {
         return null;
       }
     } catch (e) {
+      if(e is UnauthorizedException) rethrow;
       print('Excepción al obtener periodo: $e');
       return null;
     }
@@ -189,6 +194,7 @@ class AuthService {
         return false;
       }
     } catch (e) {
+      if(e is UnauthorizedException) rethrow;
       print('Excepción al conectar con el servidor: $e');
       return false;
     }
