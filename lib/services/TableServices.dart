@@ -26,34 +26,43 @@ class Tableservices {
     }
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(response.body);
-      print(response.body);
+      //print(response.body);
       return jsonList.map((item) => fromjson(item)).toList();
     } else {
       throw Exception('Error al cargar datos desde $endpoint');
     }
   }
 
-  Future<bool> actualizarUsuario({
+  Future<bool> actualizar({
     required String endpoint,
-    required String documento,
+    required dynamic documento,
     required String? token,
-    required Map<String, dynamic> data,
+    Map<String, dynamic>? data,
+    String? extencion,
   }) async {
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     };
 
-    final actualizar = await http.put(
-      Uri.parse('$baseUrl/$endpoint/$documento'),
-      headers: headers,
-      body: jsonEncode(data),
+    final url = Uri.parse(
+      extencion == null
+          ? '$baseUrl/$endpoint/$documento'
+          : '$baseUrl/$endpoint/$documento/$extencion',
     );
+
+    final actualizar = data != null
+        ? await http.put(url, headers: headers, body: jsonEncode(data))
+        : await http.put(url, headers: headers);
+    //print('este es el token ${token} ');
+    //print('datos recubidos ${data}, y este es la respuest del back ${actualizar.body}',);
+
     if(actualizar.statusCode == 401) {
       throw UnauthorizedException();
     }
-    print('este es el token ${token} ');
-    print('datos recubidos ${data}, y este es la respuest del back ${actualizar.body}');
+    
+
+
     return actualizar.statusCode == 200;
   }
 
@@ -77,6 +86,7 @@ class Tableservices {
     return response.statusCode == 200;
   }
 
+
   Future<bool> activarUsuario(
     String endponit,
     dynamic documento,
@@ -96,4 +106,5 @@ class Tableservices {
     }
     return response.statusCode == 200;
   }
+
 }

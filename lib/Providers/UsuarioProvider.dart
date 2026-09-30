@@ -7,8 +7,6 @@ import 'package:winbin/main.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 
-
-
 class UsuarioProvider extends ChangeNotifier {
   final Tableservices _apiService = Tableservices();
 
@@ -39,12 +37,10 @@ class UsuarioProvider extends ChangeNotifier {
         fromjson: (json) => Usuario.fromJson(json),
         token: _token,
       );
-
     } on UnauthorizedException {
       rethrow;
-
     } catch (e) {
-        if (e is UnauthorizedException) {
+      if (e is UnauthorizedException) {
         print('Sesión expirada detectada en UsuarioProvider');
         _forzarCierreDeSesion();
       } else {
@@ -60,7 +56,7 @@ class UsuarioProvider extends ChangeNotifier {
 
   Future<bool> actualizarUsuario(Usuario usuarioEditado) async {
     try {
-      final usuarios = await _apiService.actualizarUsuario(
+      final usuarios = await _apiService.actualizar(
         endpoint: 'usuarios',
         documento: usuarioEditado.documento,
         token: _token,
@@ -68,7 +64,9 @@ class UsuarioProvider extends ChangeNotifier {
       );
       if (usuarios) {
         // Encontrar la posición del usuario en la lista local y reemplazarlo
-        final index = _usuarios.indexWhere((u) => u.documento == usuarioEditado.documento);
+        final index = _usuarios.indexWhere(
+          (u) => u.documento == usuarioEditado.documento,
+        );
         if (index != -1) {
           _usuarios[index] = usuarioEditado;
           notifyListeners(); // <-- Esto actualiza la tabla genérica automáticamente
@@ -106,10 +104,11 @@ class UsuarioProvider extends ChangeNotifier {
   }
 
   Future<void> activarUsuario(String documento) async {
-    final activarUsuario = await _apiService.activarUsuario(
-      'usuarios',
-      documento,
-      _token,
+    final activarUsuario = await _apiService.actualizar(
+      endpoint: 'usuarios',
+      documento: documento,
+      token: _token,
+      extencion: 'reactivar',
     );
     if (activarUsuario) {
       final index = _usuarios.indexWhere((u) => u.documento == documento);
@@ -134,5 +133,31 @@ class UsuarioProvider extends ChangeNotifier {
 
       context.read<AuthProvider>().logout();
     }
+    }
+
+    Future<bool> cambiarRol(String docuemnto, String rolCambiado) async {
+      try {
+        final cambiarRol = await _apiService.actualizar(
+          endpoint: 'usuarios',
+          documento: docuemnto,
+          token: _token,
+          extencion: 'rol',
+          data: {'rol': rolCambiado},
+        );
+        if (cambiarRol) {
+          final index = _usuarios.indexWhere((u) => u.documento == docuemnto);
+          if (index != -1) {
+            _usuarios[index] = _usuarios[index].copyWith(rol: rolCambiado);
+            notifyListeners();
+          }
+          return true;
+        }
+
+        return false;
+      } catch (e) {
+        print('Error al actualizar el rol $e');
+        return false;
+      }
+    }
   }
-}
+

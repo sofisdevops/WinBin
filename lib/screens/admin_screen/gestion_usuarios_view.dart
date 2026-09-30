@@ -110,6 +110,9 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                         user.documento,
                       );
                     },
+                    cambiarRol:(user){
+                    _dialogRol(context,user);
+                    } ,
                     isRowActive: (item) => item.activo,
                   ),
                 ],
@@ -127,7 +130,6 @@ class _gestionUsuario extends State<GestionUsuariosView> {
     final controllerPuntosUser = TextEditingController(
       text: usuario.puntos.toString(),
     );
-    final controllerRolUser = TextEditingController(text: usuario.rol);
     Curso? cursoSeleccionado = usuario.curso;
 
     showDialog(
@@ -187,10 +189,7 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                 decoration: InputDecoration(labelText: 'Puntos'),
               ),
               const SizedBox(height: 10),
-              TextField(
-                controller: controllerRolUser,
-                decoration: InputDecoration(labelText: 'Rol'),
-              ),
+              
             ],
           ),
           actions: [
@@ -208,7 +207,6 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                   curso: cursoSeleccionado,
                   puntos:
                       int.tryParse(controllerPuntosUser.text) ?? usuario.puntos,
-                  rol: controllerRolUser.text,
                 );
 
                 // Llamar al provider
@@ -221,6 +219,76 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Usuario actualizado correctamente'),
+                    ),
+                  );
+                }
+              },
+              child: const Text(
+                'Guardar',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _dialogRol(BuildContext context, Usuario usuario) {
+    const List<String> list = <String>['ESTUDIANTE', 'ADMIN'];
+
+    String dropdownValue = list.firstWhere(
+                    (c) => c == usuario.rol,
+                    orElse: () => list
+                        .first, // Valor por defecto si no lo encuentra
+                  );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Editar Rol de usuario ${usuario.nombre}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField(
+                initialValue: dropdownValue,
+                icon: const Icon(Icons.arrow_downward),
+                elevation: 10,
+                style: const TextStyle(color: Color.fromARGB(255, 17, 82, 17)),
+                items: list.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                    dropdownValue = value!;
+                  
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2E7D32),
+              ),
+              onPressed: () async {
+                // Llamar al provider
+                final exito = await context
+                    .read<UsuarioProvider>()
+                    .cambiarRol(usuario.documento, dropdownValue);
+
+                if (exito && context.mounted) {
+                  Navigator.pop(context); // Cerrar diálogo
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Rol del Usuario actualizado correctamente'),
                     ),
                   );
                 }

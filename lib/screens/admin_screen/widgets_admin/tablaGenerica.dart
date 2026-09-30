@@ -9,6 +9,7 @@ class Tablagenerica<T> extends DataTableSource {
   final Function(T item)? onDelete;
   final Function(T item)? active;
   final Function(T item)? desactive;
+  final Function(T item)? cambiarRol;
   final bool Function(T item)? isRowActive;
 
   Tablagenerica({
@@ -18,7 +19,8 @@ class Tablagenerica<T> extends DataTableSource {
     this.onDelete,
     this.active,
     this.desactive,
-    this.isRowActive
+    this.cambiarRol,
+    this.isRowActive,
   });
 
   @override
@@ -63,10 +65,20 @@ class Tablagenerica<T> extends DataTableSource {
                         color: Colors.green,
                       ),
                       tooltip: 'Activar',
-                      onPressed: () =>active!(item),
+                      onPressed: () => active!(item),
                     ),
                 ],
               ],
+
+              if (cambiarRol != null)
+                IconButton(
+                  icon: const Icon(
+                    Icons.admin_panel_settings_outlined,
+                    color: Colors.orangeAccent,
+                  ),
+                  tooltip: 'Cambiar Rol',
+                  onPressed: () => cambiarRol!(item),
+                ),
 
               // 3. Botón Eliminar Definitivamente (Trash/Delete)
               if (onDelete != null)
@@ -83,12 +95,11 @@ class Tablagenerica<T> extends DataTableSource {
 
     // para los colores intercalados
     final esPar = index % 2 == 0;
-    final colorFondo = esPar ? const Color(0xFFF4F4F3) : const Color(0xFFEDECE8);
+    final colorFondo = esPar
+        ? const Color(0xFFF4F4F3)
+        : const Color(0xFFEDECE8);
 
-    return DataRow(
-      color: WidgetStateProperty.all(colorFondo),
-      cells: cells,
-    );
+    return DataRow(color: WidgetStateProperty.all(colorFondo), cells: cells);
   }
 
   @override
@@ -111,6 +122,7 @@ class GenericTable<T> extends StatelessWidget {
   final int rowsPerPage;
   final Function(T item)? active;
   final Function(T item)? desactive;
+  final Function(T item)? cambiarRol;
   final bool Function(T item)? isRowActive;
 
   const GenericTable({
@@ -124,7 +136,8 @@ class GenericTable<T> extends StatelessWidget {
     this.rowsPerPage = 5,
     this.active,
     this.desactive,
-    this.isRowActive
+    this.cambiarRol,
+    this.isRowActive,
   });
 
   @override
@@ -140,7 +153,8 @@ class GenericTable<T> extends StatelessWidget {
       onDelete: onDelete,
       active: active,
       desactive: desactive,
-      isRowActive: isRowActive
+      cambiarRol: cambiarRol,
+      isRowActive: isRowActive,
     );
 
     return ScrollConfiguration(
@@ -163,15 +177,17 @@ class GenericTable<T> extends StatelessWidget {
             rowsPerPage: rowsPerPage,
             headingRowColor: WidgetStateProperty.all(const Color(0xFFD06E4B)),
             columns: allColumns
-                .map((col) => DataColumn(
-                      label: Text(
-                        col,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                .map(
+                  (col) => DataColumn(
+                    label: Text(
+                      col,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ))
+                    ),
+                  ),
+                )
                 .toList(),
             source: source,
           ),
