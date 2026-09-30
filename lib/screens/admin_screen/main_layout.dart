@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:winbin/screens/admin_screen/gestion_puntos_view.dart';
+import 'package:winbin/screens/admin_screen/gestion_usuarios_view.dart';
 import 'configuracion_reglas_view.dart';
 import 'periodos_view.dart';
+import 'ranking_filtros_view.dart';
 import 'widgets_admin/header_bar.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
-import 'package:winbin/screens/login_screens/login_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:winbin/screens/admin_screen/dashboard_screen.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -18,22 +21,19 @@ class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
 
   final List<Widget> _views = const [
+    DashboardContent(),
     GestionPuntosView(),
     ConfiguracionReglasView(),
     PeriodosView(),
-    Center(child: Text('Vista: Ranking & Filtros')),
-    Center(child: Text('Vista: Gestión de Usuarios')),
+    RankingView(),
+    GestionUsuariosView(),
   ];
 
   Future<void> _cerrarSesion() async {
     await context.read<AuthProvider>().logout();
 
     if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
+      context.go('/login');
     }
   }
 
@@ -43,8 +43,8 @@ class _MainLayoutState extends State<MainLayout> {
       body: Row(
         children: [
           Container(
-            width: 250,
-            color: const Color(0xFF66BB6A),
+            width: 220,
+            color: const Color.fromARGB(255, 51, 122, 55),
             child: Column(
               children: [
                 const SizedBox(height: 30),
@@ -84,13 +84,14 @@ class _MainLayoutState extends State<MainLayout> {
                   ],
                 ),
                 const SizedBox(height: 40),
-                _buildNavItem(0, Icons.stars, 'Gestión de Puntos'),
-                _buildNavItem(1, Icons.rule, 'Configuración de Reglas'),
-                _buildNavItem(2, Icons.calendar_today, 'Periodos'),
-                _buildNavItem(3, Icons.bar_chart, 'Ranking & Filtros'),
-                _buildNavItem(4, Icons.people, 'Gestión de Usuarios'),
+                _buildNavItem(0, Icons.dashboard, 'Panel de Control'),
+                _buildNavItem(1, Icons.stars, 'Gestión de Puntos'),
+                _buildNavItem(2, Icons.rule, 'Configuración de Reglas'),
+                _buildNavItem(3, Icons.calendar_today, 'Periodos'),
+                _buildNavItem(4, Icons.bar_chart, 'Ranking'),
+                _buildNavItem(5, Icons.people, 'Gestión de Usuarios'),
                 const Spacer(),
-                _buildNavItem(5, Icons.settings, 'Ajustes', isAction: true),
+                _buildNavItem(6, Icons.settings, 'Ajustes', isAction: true),
                 _buildNavItem(
                   6,
                   Icons.logout,
