@@ -6,8 +6,7 @@ import 'widgets_screen/custom_button.dart';
 import 'widgets_screen/custom_text.dart';
 import 'widgets_screen/login_footer.dart';
 import 'widgets_screen/login_header.dart';
-import 'package:winbin/screens/login_screens/register_screen.dart';
-
+import 'package:go_router/go_router.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -70,10 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute<void>(builder: (_) => const MainLayout()),
-        );
+        context.go('/home');
       } else {
         _mostrarError('Credenciales incorrectas');
       }
@@ -197,12 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     textColor: const Color(0xFF800000),
                     iconColor: const Color(0xFF800000),
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (_) => const RegisterScreen(),
-                        ),
-                      );
+                      context.go('/register');
                     },
                   ),
                   const SizedBox(height: 25),

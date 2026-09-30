@@ -1,4 +1,3 @@
-
 class LoginResponse {
   final String token;
   final String documento;
@@ -7,31 +6,34 @@ class LoginResponse {
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
-      token: json['token'] ?? '', 
+      token: json['token'] ?? '',
       documento: json['documento'] ?? '',
     );
   }
 }
 
-
 class Curso {
-  final int? idCurso;
+  final int? id_curso;
   final String nombre;
-  final int puntosTotales;
+  final int? puntosTotales;
 
-  Curso({ this.idCurso, required this.nombre, required this.puntosTotales});
+  Curso({this.id_curso, required this.nombre, required this.puntosTotales});
 
   factory Curso.fromJson(Map<String, dynamic> json) {
     return Curso(
-      idCurso: json['id_curso'] ?? 0,
+      id_curso: json['id_curso'] ?? 0,
       nombre: json['nombreCurso'] ?? " sin curso ",
       puntosTotales: json['puntosTotales'] ?? 0,
     );
   }
-
-  
+  Map<String, dynamic> toJson() {
+    return {
+      'id_curso': id_curso,
+      'nombreCurso': nombre,
+      if (puntosTotales != null) 'puntosTotales': puntosTotales,
+    };
+  }
 }
-
 
 class UsuarioPerfil {
   final bool activo;
@@ -66,32 +68,34 @@ class UsuarioPerfil {
       rol: json['rol'] ?? 'USER',
     );
   }
-
-  
 }
 
 class Periodo {
   final bool activo;
   final DateTime fechaFinal;
   final DateTime fechaInicio;
-  final String idPeriodo ;
+  final String idPeriodo;
   final String nombrePeriodo;
-  
-  
-  Periodo({ required this.idPeriodo, required this.nombrePeriodo, required this.fechaInicio, required this.fechaFinal, required this.activo});
+
+  Periodo({
+    required this.idPeriodo,
+    required this.nombrePeriodo,
+    required this.fechaInicio,
+    required this.fechaFinal,
+    required this.activo,
+  });
 
   factory Periodo.fromJson(Map<String, dynamic> json) {
     return Periodo(
       idPeriodo: json['id_periodo'] ?? '',
       nombrePeriodo: json['nombrePeriodo'] ?? '',
-      fechaInicio: json['fechaInicio'] != null 
-          ? DateTime.parse(json['fechaInicio']) 
-          : DateTime.now(), 
-      fechaFinal: json['fechaFin'] != null 
-          ? DateTime.parse(json['fechaFin']) 
+      fechaInicio: json['fechaInicio'] != null
+          ? DateTime.parse(json['fechaInicio'])
           : DateTime.now(),
-      activo: json['activo']?? false,
+      fechaFinal: json['fechaFin'] != null
+          ? DateTime.parse(json['fechaFin'])
+          : DateTime.now(),
+      activo: json['activo'] ?? false,
     );
   }
-
 }
