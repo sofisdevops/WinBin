@@ -11,10 +11,10 @@ import 'package:winbin/screens/login_screens/register_screen.dart';
 import 'Providers/gestion_puntos_provider.dart';
 import 'Providers/auditoria_provider.dart';
 import 'Providers/dashboard_provider.dart';
+import 'package:winbin/screens/user_screen/profile_screen/profile_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> shellNavigatorKey =
-    GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouterSetup {
   static GoRouter createRouter(AuthProvider authProvider) {
@@ -73,13 +73,7 @@ class AppRouterSetup {
             ),
             GoRoute(
               path: '/perfil',
-              builder:
-                  (context, state) {
-                        return const Scaffold(
-                          body: Center(child: Text('Vista Perfil')),
-                        );
-                      }
-                      as Widget Function(BuildContext, GoRouterState),
+              builder: (context, state) => ProfileScreen(),
             ),
           ],
         ),
@@ -88,8 +82,7 @@ class AppRouterSetup {
   }
 }
 
-
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 

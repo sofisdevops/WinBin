@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui';
+import 'dart:math' as math;
 
 class Tablagenerica<T> extends DataTableSource {
   final List<T> data;
@@ -125,6 +126,8 @@ class GenericTable<T> extends StatelessWidget {
   final Function(T item)? cambiarRol;
   final bool Function(T item)? isRowActive;
 
+  final double minWidth;
+
   const GenericTable({
     super.key,
     required this.title,
@@ -138,6 +141,7 @@ class GenericTable<T> extends StatelessWidget {
     this.desactive,
     this.cambiarRol,
     this.isRowActive,
+    this.minWidth = 800.0,
   });
 
   @override
@@ -157,42 +161,47 @@ class GenericTable<T> extends StatelessWidget {
       isRowActive: isRowActive,
     );
 
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(
-        dragDevices: {
-          PointerDeviceKind.touch,
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.trackpad,
-        },
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width > 900
-              ? MediaQuery.of(context).size.width - 320
-              : 800,
-          height: 650,
-          child: PaginatedDataTable(
-            header: Text(title),
-            rowsPerPage: rowsPerPage,
-            headingRowColor: WidgetStateProperty.all(const Color(0xFFD06E4B)),
-            columns: allColumns
-                .map(
-                  (col) => DataColumn(
-                    label: Text(
-                      col,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-            source: source,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double tableWidth = math.max(constraints.maxWidth, minWidth);
+        return ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(
+            dragDevices: {
+              PointerDeviceKind.touch,
+              PointerDeviceKind.mouse,
+              PointerDeviceKind.trackpad,
+            },
           ),
-        ),
-      ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: tableWidth,
+              height: 650,
+              child: PaginatedDataTable(
+                header: Text(title),
+                rowsPerPage: rowsPerPage,
+                headingRowColor: WidgetStateProperty.all(
+                  const Color(0xFFD06E4B),
+                ),
+                columns: allColumns
+                    .map(
+                      (col) => DataColumn(
+                        label: Text(
+                          col,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                source: source,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

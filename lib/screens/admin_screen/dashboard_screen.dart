@@ -26,8 +26,6 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   Widget build(BuildContext context) {
-     
-
     return Consumer<DashboardProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
@@ -36,67 +34,79 @@ class _DashboardContentState extends State<DashboardContent> {
           );
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            
-            // 1. TARJETAS (5 Métricas)
-            LayoutBuilder(
-              builder: (context, constraints) {
-                int columnas = constraints.maxWidth < 650 ? 1 : (constraints.maxWidth < 1100 ? 3 : 5);
-                
-                return GridView.count(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  crossAxisCount: columnas,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: constraints.maxWidth < 650 ? 2.5 : 1.6,
-                  children: [
-                    StatCard(title: 'Usuarios', value: provider.totalUsuarios, icon: Icons.people, color: Colors.blue),
-                    StatCard(title: 'Inactivos', value: provider.usuariosInactivos, icon: Icons.person_off, color: Colors.red),
-                    StatCard(title: 'Cursos', value: provider.totalCursos, icon: Icons.school, color: Colors.purple),
-                    StatCard(title: 'Materiales', value: provider.totalMateriales, icon: Icons.category, color: Colors.teal),
-                    StatCard(title: 'Puntos Totales', value: provider.totalPuntos, icon: Icons.stars, color: Colors.amber[700]!),
-                  ],
-                );
-              }
-            ),
-            
-            const SizedBox(height: 32),
-            
-            LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth >= 1100) {
-                  return Row(
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  int columnas = constraints.maxWidth < 650 ? 1 : (constraints.maxWidth < 1100 ? 3 : 5);
+                  double spacing = 16.0;
+                  double cardWidth = (constraints.maxWidth - (spacing * (columnas - 1))) / columnas - 0.1;
+                  
+                  return Wrap(
+                    spacing: spacing, 
+                    runSpacing: spacing, 
                     children: [
-                      Expanded(
-                        child: _buildChartContainer('Sesiones (Por Día)', provider.sesionesSpots, provider.fechasSesiones, Colors.blue),
+                      SizedBox(
+                        width: cardWidth,
+                        child: StatCard(title: 'Usuarios', value: provider.totalUsuarios, icon: Icons.people, color: Colors.blue)
                       ),
-                      const SizedBox(width: 24),
-                      Expanded(
-                        child: _buildChartContainer('Reciclajes Exitosos (Por Día)', provider.reciclajeSpots, provider.fechasReciclaje, const Color(0xFF2E7D32)),
+                      SizedBox(
+                        width: cardWidth,
+                        child: StatCard(title: 'Inactivos', value: provider.usuariosInactivos, icon: Icons.person_off, color: Colors.red)
+                      ),
+                      SizedBox(
+                        width: cardWidth,
+                        child: StatCard(title: 'Cursos', value: provider.totalCursos, icon: Icons.school, color: Colors.purple)
+                      ),
+                      SizedBox(
+                        width: cardWidth,
+                        child: StatCard(title: 'Materiales', value: provider.totalMateriales, icon: Icons.category, color: Colors.teal)
+                      ),
+                      SizedBox(
+                        width: cardWidth,
+                        child: StatCard(title: 'Puntos Totales', value: provider.totalPuntos, icon: Icons.stars, color: Colors.amber[700]!)
                       ),
                     ],
                   );
                 }
-                // Si la pantalla es tablet o móvil, los apila
-                return Column(
-                  children: [
-                    _buildChartContainer('Sesiones (Por Día)', provider.sesionesSpots, provider.fechasSesiones, Colors.blue),
-                    const SizedBox(height: 24),
-                    _buildChartContainer('Reciclajes Exitosos (Por Día)', provider.reciclajeSpots, provider.fechasReciclaje, const Color(0xFF2E7D32)),
-                  ],
-                );
-              }
-            ),
-          ],
+              ),
+              
+              const SizedBox(height: 32),
+              
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth >= 1100) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: _buildChartContainer('Sesiones (Por Día)', provider.sesionesSpots, provider.fechasSesiones, Colors.blue),
+                        ),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          child: _buildChartContainer('Reciclajes Exitosos (Por Día)', provider.reciclajeSpots, provider.fechasReciclaje, const Color(0xFF2E7D32)),
+                        ),
+                      ],
+                    );
+                  }
+                  return Column(
+                    children: [
+                      _buildChartContainer('Sesiones (Por Día)', provider.sesionesSpots, provider.fechasSesiones, Colors.blue),
+                      const SizedBox(height: 24),
+                      _buildChartContainer('Reciclajes Exitosos (Por Día)', provider.reciclajeSpots, provider.fechasReciclaje, const Color(0xFF2E7D32)),
+                    ],
+                  );
+                }
+              ),
+            ],
+          ),
         );
       },
     );
   }
 
-  // Componente generador de gráficos
   Widget _buildChartContainer(String title, List<FlSpot> spots, List<String> fechas, Color color) {
     return Container(
       height: 380,
@@ -104,7 +114,13 @@ class _DashboardContentState extends State<DashboardContent> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05), 
+            blurRadius: 10, 
+            offset: const Offset(0, 4)
+          )
+        ],
       ),
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -177,4 +193,3 @@ class _DashboardContentState extends State<DashboardContent> {
     );
   }
 }
-
