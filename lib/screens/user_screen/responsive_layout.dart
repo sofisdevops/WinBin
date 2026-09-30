@@ -15,20 +15,42 @@ class ResponsiveLayout extends StatelessWidget {
     return 0;
   }
 
-  void _onItemTapped(int index, BuildContext context) {
-    switch (index) {
-      case 0:
-        context.go('/home');
-        break;
-      case 1:
-        context.go('/ranking');
-        break;
-      case 2:
-        context.go('/perfil');
-        break;
-      case 3:
-        context.go('/admin');
-        break;
+  void _onItemTapped(int index, BuildContext context, bool isAdmin, AuthProvider authProvider) {
+    if (isAdmin) {
+      switch (index) {
+        case 0:
+          context.go('/home');
+          break;
+        case 1:
+          context.go('/ranking');
+          break;
+        case 2:
+          context.go('/perfil');
+          break;
+        case 3:
+          context.go('/admin');
+          break;
+        case 4:
+          authProvider.logout(); 
+          context.go('/login');
+          break;
+      }
+    } else {
+      switch (index) {
+        case 0:
+          context.go('/home');
+          break;
+        case 1:
+          context.go('/ranking');
+          break;
+        case 2:
+          context.go('/perfil');
+          break;
+        case 3:
+          authProvider.logout(); 
+          context.go('/login');
+          break;
+      }
     }
   }
 
@@ -38,24 +60,12 @@ class ResponsiveLayout extends StatelessWidget {
     final bool isAdmin = authProvider.rol == 'ADMIN';
 
     final String location = GoRouterState.of(context).uri.path;
-    final int currentIndex = _getSelectedIndex(location);
+    int currentIndex = _getSelectedIndex(location);
 
-    final railItems = [
-      const NavigationRailDestination(
-        icon: Icon(Icons.home_outlined),
-        label: Text('Inicio'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.emoji_events_outlined),
-        label: Text('Ranking'),
-      ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.person_outlined),
-        label: Text('Perfil'),
-      ),
-    ];
-
-    final bottomItems = [
+    if (currentIndex == 3 && !isAdmin) {
+      currentIndex = 0;
+    }
+    final bottomItems = <BottomNavigationBarItem>[
       const BottomNavigationBarItem(
         icon: Icon(Icons.home_outlined),
         label: 'Inicio',
@@ -64,17 +74,13 @@ class ResponsiveLayout extends StatelessWidget {
         icon: Icon(Icons.emoji_events),
         label: 'Ranking',
       ),
-      const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.person),
+        label: 'Perfil',
+      ),
     ];
 
     if (isAdmin) {
-      railItems.add(
-        const NavigationRailDestination(
-          icon: Icon(Icons.admin_panel_settings_outlined),
-          selectedIcon: Icon(Icons.admin_panel_settings),
-          label: Text('Admin'),
-        ),
-      );
       bottomItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.admin_panel_settings),
@@ -83,7 +89,12 @@ class ResponsiveLayout extends StatelessWidget {
       );
     }
 
-    final int safeIndex = currentIndex >= bottomItems.length ? 0 : currentIndex;
+    bottomItems.add(
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.logout, color: Colors.redAccent),
+        label: 'Cerrar sesión',
+      ),
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -94,9 +105,9 @@ class ResponsiveLayout extends StatelessWidget {
               children: [
                 NavigationRail(
                   extended: isExtended,
-                  selectedIndex: safeIndex,
+                  selectedIndex: currentIndex >= bottomItems.length - 1 ? 0 : currentIndex,
                   onDestinationSelected: (index) =>
-                      _onItemTapped(index, context),
+                      _onItemTapped(index, context, isAdmin, authProvider),
                   backgroundColor: const Color(0xFF1E1E1E),
                   useIndicator: true,
                   indicatorColor: const Color(
@@ -126,7 +137,7 @@ class ResponsiveLayout extends StatelessWidget {
                       children: [
                         Image.asset(
                           'lib/assets/images/logo.png',
-                          width: 64, // Ajusta el tamaño si es necesario
+                          width: 64,
                         ),
                         if (isExtended) ...[
                           const SizedBox(height: 8),
@@ -144,7 +155,30 @@ class ResponsiveLayout extends StatelessWidget {
                       ],
                     ),
                   ),
-                  destinations: railItems,
+                  destinations: [
+                    const NavigationRailDestination(
+                      icon: Icon(Icons.home_outlined),
+                      label: Text('Inicio'),
+                    ),
+                    const NavigationRailDestination(
+                      icon: Icon(Icons.emoji_events_outlined),
+                      label: Text('Ranking'),
+                    ),
+                    const NavigationRailDestination(
+                      icon: Icon(Icons.person_outlined),
+                      label: Text('Perfil'),
+                    ),
+                    if (isAdmin)
+                      const NavigationRailDestination(
+                        icon: Icon(Icons.admin_panel_settings_outlined),
+                        selectedIcon: Icon(Icons.admin_panel_settings),
+                        label: Text('Admin'),
+                      ),
+                    const NavigationRailDestination(
+                      icon: Icon(Icons.logout, color: Colors.redAccent),
+                      label: Text('Cerrar sesión', style: TextStyle(color: Colors.redAccent)),
+                    ),
+                  ],
                 ),
                 const VerticalDivider(
                   thickness: 1,
@@ -169,8 +203,8 @@ class ResponsiveLayout extends StatelessWidget {
           body: child,
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
-            currentIndex: safeIndex,
-            onTap: (index) => _onItemTapped(index, context),
+            currentIndex: currentIndex >= bottomItems.length ? 0 : currentIndex,
+            onTap: (index) => _onItemTapped(index, context, isAdmin, authProvider),
             backgroundColor: const Color(0xFF1E1E1E),
             selectedItemColor: const Color(0xFF66BB6A),
             unselectedItemColor: Colors.white54,

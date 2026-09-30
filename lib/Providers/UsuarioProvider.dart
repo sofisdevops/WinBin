@@ -3,6 +3,11 @@ import 'package:http/http.dart';
 import '../services/TableServices.dart';
 import '../models/users_model.dart';
 import 'package:winbin/utils/api_exceptions.dart';
+import 'package:winbin/main.dart';
+import 'package:provider/provider.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+
+
 
 class UsuarioProvider extends ChangeNotifier {
   final Tableservices _apiService = Tableservices();
@@ -39,6 +44,13 @@ class UsuarioProvider extends ChangeNotifier {
       rethrow;
 
     } catch (e) {
+        if (e is UnauthorizedException) {
+        print('Sesión expirada detectada en UsuarioProvider');
+        _forzarCierreDeSesion();
+      } else {
+        print('Error al buscar estudiantes: $e');
+        _usuarios = [];
+      }
       _errorMessage = e.toString();
     } finally {
       _isLoading = false;
@@ -65,6 +77,13 @@ class UsuarioProvider extends ChangeNotifier {
       }
       return false;
     } catch (e) {
+      if (e is UnauthorizedException) {
+        print('Sesión expirada detectada en UsuarioProvider');
+        _forzarCierreDeSesion();
+      } else {
+        print('Error al actualizar usuario: $e');
+        _errorMessage = e.toString();
+      }
       print('Error al actualiza $e');
       return false;
     }
@@ -98,6 +117,22 @@ class UsuarioProvider extends ChangeNotifier {
         _usuarios[index] = _usuarios[index].copyWith(activo: true);
         notifyListeners();
       }
+    }
+  }
+
+  // Cierra sesión y redirige al Login
+  void _forzarCierreDeSesion() {
+    final context = rootNavigatorKey.currentContext;
+    if (context != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tu sesión expiró. Vuelve a ingresar.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      context.read<AuthProvider>().logout();
     }
   }
 }

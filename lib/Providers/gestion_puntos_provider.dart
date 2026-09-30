@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:winbin/main.dart';
 import 'package:winbin/models/users_model.dart';
 import 'package:winbin/services/TableServices.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:winbin/utils/api_exceptions.dart';
 
 class GestionPuntosProvider extends ChangeNotifier {
   final Tableservices _tableServices = Tableservices();
@@ -42,7 +46,6 @@ class GestionPuntosProvider extends ChangeNotifier {
 
       // filtra la lista segun la identificacion o el nombre ingresado
       _estudiantesEncontrados = _todosLosUsuarios.where((estudiante) {
-
         // revisa si el documento coincide o si el campo esta vacio
         bool coincideId =
             textoId.isEmpty ||
@@ -65,6 +68,13 @@ class GestionPuntosProvider extends ChangeNotifier {
         return coincideId && coincideNombre && coincideCurso;
       }).toList();
     } catch (e) {
+      if (e is UnauthorizedException) {
+        print('Sesión expirada detectada en GestionPuntosProvider');
+        _forzarCierreDeSesion();
+      } else {
+        print('Error al buscar estudiantes: $e');
+        _estudiantesEncontrados = [];
+      }
       print('Error al buscar estudiantes: $e');
       _estudiantesEncontrados = [];
     }
@@ -80,5 +90,21 @@ class GestionPuntosProvider extends ChangeNotifier {
     cursoController.clear();
     _estudiantesEncontrados = [];
     notifyListeners();
+  }
+
+  // Cierra sesión y redirige al Login
+  void _forzarCierreDeSesion() {
+    final context = rootNavigatorKey.currentContext;
+    if (context != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tu sesión expiró. Vuelve a ingresar.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      context.read<AuthProvider>().logout();
+    }
   }
 }
