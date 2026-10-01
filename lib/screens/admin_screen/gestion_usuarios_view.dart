@@ -139,10 +139,12 @@ class _gestionUsuario extends State<GestionUsuariosView> {
   }
 
   void _showEditDialog(BuildContext context, Usuario usuario) {
+    Curso? cursoSeleccionado;
     final controllerNameUser = TextEditingController(text: usuario.nombre);
+
     final controllerPuntosUser = TextEditingController(text: usuario.puntos.toString());
     
-    Curso? cursoSeleccionado; 
+
 
     showDialog(
       context: context,
@@ -158,6 +160,7 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                   decoration: const InputDecoration(labelText: 'Nombre'),
                 ),
                 const SizedBox(height: 10),
+
 
                 FutureBuilder<List<Curso>?>(
                   future: context.read<AuthProvider>().cargarCursos(),
@@ -176,15 +179,15 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                     final cursosDisponibles = snapshot.data ?? [];
 
                     
-                    final cursoInicial = cursosDisponibles.firstWhere(
+                    cursoSeleccionado = cursosDisponibles.firstWhere(
                       (c) => c.id_curso == usuario.curso?.id_curso,
                       orElse: () => cursosDisponibles.first, 
                     );
 
-                    cursoSeleccionado ??= cursoInicial;
+                    
 
                     return DropdownButtonFormField<Curso>(
-                      value: cursoInicial,
+                      initialValue: cursoSeleccionado,
                       decoration: const InputDecoration(labelText: 'Curso'),
                       items: cursosDisponibles.map((curso) {
                         return DropdownMenuItem<Curso>(
@@ -193,7 +196,9 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                         );
                       }).toList(),
                       onChanged: (val) {
+                         setState(() {
                         cursoSeleccionado = val;
+                      });
                       },
                     );
                   },
@@ -208,6 +213,8 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                 const SizedBox(height: 10),
               ],
             ),
+
+            
           ),
           actions: [
             TextButton(
@@ -256,6 +263,7 @@ class _gestionUsuario extends State<GestionUsuariosView> {
     String dropdownValue = list.firstWhere(
       (c) => c == usuario.rol,
       orElse: () => list.first,
+
     );
 
     showDialog(
@@ -263,12 +271,13 @@ class _gestionUsuario extends State<GestionUsuariosView> {
       builder: (context) {
         return AlertDialog(
           title: Text('Editar Rol de usuario ${usuario.nombre}'),
+
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  value: dropdownValue,
+                  initialValue: dropdownValue,
                   icon: const Icon(Icons.arrow_downward),
                   elevation: 10,
                   style: const TextStyle(color: Color.fromARGB(255, 17, 82, 17)),
@@ -284,6 +293,7 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                 ),
               ],
             ),
+
           ),
           actions: [
             TextButton(
@@ -299,11 +309,14 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                     .read<UsuarioProvider>()
                     .cambiarRol(usuario.documento, dropdownValue);
 
+
                 if (exito && context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Rol del Usuario actualizado correctamente'),
+                      content: Text(
+                        'Rol del Usuario actualizado correctamente',
+                      ),
                     ),
                   );
                 }
