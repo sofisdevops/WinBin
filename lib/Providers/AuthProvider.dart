@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:winbin/services/AuthService.dart';
 import 'package:winbin/models/auth_model.dart';
 import 'package:winbin/utils/api_exceptions.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:winbin/services/UsuarioService.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -31,9 +34,47 @@ class AuthProvider extends ChangeNotifier {
 
   static const String _keyToken = 'jwt_token';
 
+  bool isUpdatingProfile = false;
+
   bool get isLoggedIn {
     if (_token == null) return false;
     return !JwtDecoder.isExpired(_token!);
+  }
+
+  final UsuarioService _usuarioService = UsuarioService();
+  bool isUploadingAvatar = false;
+
+  Future<bool> cambiarPassword(String passwordActual, String passwordNueva) async {
+    if (token == null) return false;
+
+    isUpdatingProfile = true;
+    notifyListeners();
+
+    final exito = await _usuarioService.cambiarPassword(token!, passwordActual, passwordNueva);
+    isUpdatingProfile = false;
+
+    notifyListeners();
+    return exito;
+  }
+
+  Future<bool> actualizarAvatar(XFile imageFile) async {
+    if (token == null) return false;
+
+    isUploadingAvatar = true;
+    notifyListeners();
+
+    final nuevaUrl = await _usuarioService.actualizarAvatar( imageFile, token!);
+
+    if (nuevaUrl != null) {
+      _usuarioActual = _usuarioActual?.copyWith(avatarUrl: nuevaUrl);
+      isUploadingAvatar = false;
+      notifyListeners();
+      return true;
+    } else {
+      isUploadingAvatar = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<bool> iniciarSesion(String documento, String contrasenna) async {

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
 
 class StatsCard extends StatelessWidget {
   const StatsCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
+    final usuario = authProvider.usuarioActual;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -18,7 +22,7 @@ class StatsCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 4),
             color: const Color(0xFF00FF66),
             child: const Text(
-              'ESTADISTICAS',
+              'Informacion del Estudiante',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.black,
@@ -33,6 +37,36 @@ class StatsCard extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.school, color: Colors.grey, size: 16),
+                        SizedBox(width: 8),
+                        Text(
+                          'Curso',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Courier',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      "${usuario!.curso!.nombre}",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Courier',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -53,8 +87,8 @@ class StatsCard extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        const Text(
-                          '1250 ',
+                        Text(
+                          "${usuario!.puntos}",
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'Courier',
@@ -62,50 +96,7 @@ class StatsCard extends StatelessWidget {
                             fontSize: 13,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                          color: const Color(0xFF0A3315),
-                          child: const Text(
-                            '+150',
-                            style: TextStyle(
-                              color: Color(0xFF00FF66),
-                              fontFamily: 'Courier',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
                       ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.recycling, color: Colors.grey, size: 16),
-                        SizedBox(width: 8),
-                        Text(
-                          'TOTAL BOTELLAS',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Courier',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '42',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Courier',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
                     ),
                   ],
                 ),
