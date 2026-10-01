@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../profile_screen/widgets_profile/profile_app_bar.dart';
+import '../user_screen/profile_screen/widgets_profile/profile_app_bar.dart';
 import 'widgets_ranking/ranking_header.dart';
 import 'widgets_ranking/podium_banner.dart';
 import 'widgets_ranking/ranking_tabs.dart';

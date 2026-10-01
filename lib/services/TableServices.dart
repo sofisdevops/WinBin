@@ -55,7 +55,7 @@ class Tableservices {
         ? await http.put(url, headers: headers, body: jsonEncode(data))
         : await http.put(url, headers: headers);
     //print('este es el token ${token} ');
-    //print('datos recubidos ${data}, y este es la respuest del back ${actualizar.body}',);
+    print('datos recubidos ${data}, y este es la respuest del back ${actualizar.body}',);
 
     if(actualizar.statusCode == 401) {
       throw UnauthorizedException();
