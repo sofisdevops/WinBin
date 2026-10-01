@@ -68,6 +68,28 @@ class UsuarioPerfil {
       rol: json['rol'] ?? 'USER',
     );
   }
+
+  UsuarioPerfil copyWith({
+    bool? activo,
+    String? avatarUrl,
+    String? contrasenna,
+    Curso? curso,
+    String? documento,
+    String? nombre,
+    int? puntos,
+    String? rol,
+  }) {
+    return UsuarioPerfil(
+      activo: activo ?? this.activo,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      contrasenna: contrasenna ?? this.contrasenna,
+      curso: curso ?? this.curso,
+      documento: documento ?? this.documento,
+      nombre: nombre ?? this.nombre,
+      puntos: puntos ?? this.puntos,
+      rol: rol ?? this.rol,
+    );
+  }
 }
 
 class Periodo {

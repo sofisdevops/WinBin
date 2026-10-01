@@ -91,7 +91,7 @@ class ResponsiveLayout extends StatelessWidget {
               children: [
                 NavigationRail(
                   extended: isExtended,
-                  selectedIndex: currentIndex >= bottomItems.length - 1 ? 0 : currentIndex,
+                  selectedIndex: currentIndex,
                   onDestinationSelected: (index) =>
                       _onItemTapped(index, context, isAdmin, authProvider),
                   backgroundColor: const Color(0xFF1E1E1E),

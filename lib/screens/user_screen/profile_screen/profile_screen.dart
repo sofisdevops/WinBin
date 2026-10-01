@@ -4,9 +4,21 @@ import 'widgets_profile/profile_app_bar.dart';
 import 'widgets_profile/avatar_card.dart';
 import 'widgets_profile/stats_card.dart';
 import 'widgets_profile/player_details_card.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+
+  Future<void> _cerrarSesion(BuildContext context) async {
+    await context.read<AuthProvider>().logout();
+    
+    if (context.mounted) {  
+      context.go('/login');
+    }
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +34,7 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.all(12.0),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 800),
-                child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
+                child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(context),
               ),
             ),
           );
@@ -31,14 +43,34 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileLayout() {
-    return const Column(
+  Widget _buildMobileLayout(BuildContext context) {
+    return  Column(
       children: [
-        AvatarCard(),
-        SizedBox(height: 12),
-        StatsCard(),
-        SizedBox(height: 12),
-        PlayerDetailsCard(),
+        const AvatarCard(),
+        const SizedBox(height: 12),
+        const StatsCard(),
+        const SizedBox(height: 12),
+        const PlayerDetailsCard(),
+        const SizedBox(height: 24),
+              GestureDetector(
+                onTap: () => _cerrarSesion(context),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Cerrar Sesión',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
       ],
     );
   }
@@ -50,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
         Expanded(
           child: AvatarCard(),
         ),
-        SizedBox(width: 16),
+        const SizedBox(width: 24),
         Expanded(
           child: Column(
             children: [
