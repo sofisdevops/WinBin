@@ -5,6 +5,7 @@ import 'package:winbin/models/auth_model.dart';
 import 'package:winbin/screens/admin_screen/widgets_admin/tablaGenerica.dart';
 import '../../Providers/UsuarioProvider.dart';
 import '../../models/users_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class GestionUsuariosView extends StatefulWidget {
   const GestionUsuariosView({super.key});
@@ -29,7 +30,9 @@ class _gestionUsuario extends State<GestionUsuariosView> {
     return Consumer<UsuarioProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
-          return const Center(child: CircularProgressIndicator(color: Color(0xFF2E7D32)));
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF2E7D32)),
+          );
         }
 
         if (provider.errorMessage != null) {
@@ -83,7 +86,7 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                       ],
                     ),
                   ],
-                  
+
                   const Divider(height: 30),
 
                   GenericTable<Usuario>(
@@ -105,12 +108,25 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                       (user) => Text(user.curso?.nombre ?? 'sin Curso'),
                       (user) => Text(user.puntos.toString()),
                       (user) => Text(user.rol),
-                      (user) => SizedBox(
-                        width: 150, 
-                        child: Text(
-                          user.avatarUrl,
-                          overflow: TextOverflow.ellipsis, 
-                          maxLines: 1, 
+                      (user) => ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                          20,
+                        ), // Formato circular/avatar
+                        child: CachedNetworkImage(
+                          imageUrl: user.avatarUrl ?? '',
+                          width: 40,
+                          height: 40,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.account_circle,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ],
@@ -119,10 +135,14 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                     },
                     onDelete: null,
                     desactive: (user) {
-                      context.read<UsuarioProvider>().desactivar(user.documento);
+                      context.read<UsuarioProvider>().desactivar(
+                        user.documento,
+                      );
                     },
                     active: (user) {
-                      context.read<UsuarioProvider>().activarUsuario(user.documento);
+                      context.read<UsuarioProvider>().activarUsuario(
+                        user.documento,
+                      );
                     },
                     cambiarRol: (user) {
                       _dialogRol(context, user);
@@ -142,16 +162,16 @@ class _gestionUsuario extends State<GestionUsuariosView> {
     Curso? cursoSeleccionado;
     final controllerNameUser = TextEditingController(text: usuario.nombre);
 
-    final controllerPuntosUser = TextEditingController(text: usuario.puntos.toString());
-    
-
+    final controllerPuntosUser = TextEditingController(
+      text: usuario.puntos.toString(),
+    );
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text('Editar usuario ${usuario.nombre}'),
-          content: SingleChildScrollView( 
+          content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -160,7 +180,6 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                   decoration: const InputDecoration(labelText: 'Nombre'),
                 ),
                 const SizedBox(height: 10),
-
 
                 FutureBuilder<List<Curso>?>(
                   future: context.read<AuthProvider>().cargarCursos(),
@@ -178,13 +197,10 @@ class _gestionUsuario extends State<GestionUsuariosView> {
 
                     final cursosDisponibles = snapshot.data ?? [];
 
-                    
                     cursoSeleccionado = cursosDisponibles.firstWhere(
                       (c) => c.id_curso == usuario.curso?.id_curso,
-                      orElse: () => cursosDisponibles.first, 
+                      orElse: () => cursosDisponibles.first,
                     );
-
-                    
 
                     return DropdownButtonFormField<Curso>(
                       initialValue: cursoSeleccionado,
@@ -192,13 +208,13 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                       items: cursosDisponibles.map((curso) {
                         return DropdownMenuItem<Curso>(
                           value: curso,
-                          child: Text(curso.nombre), 
+                          child: Text(curso.nombre),
                         );
                       }).toList(),
                       onChanged: (val) {
-                         setState(() {
-                        cursoSeleccionado = val;
-                      });
+                        setState(() {
+                          cursoSeleccionado = val;
+                        });
                       },
                     );
                   },
@@ -213,8 +229,6 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                 const SizedBox(height: 10),
               ],
             ),
-
-            
           ),
           actions: [
             TextButton(
@@ -229,7 +243,8 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                 final usuarioActualizado = usuario.copyWith(
                   nombre: controllerNameUser.text,
                   curso: cursoSeleccionado,
-                  puntos: int.tryParse(controllerPuntosUser.text) ?? usuario.puntos,
+                  puntos:
+                      int.tryParse(controllerPuntosUser.text) ?? usuario.puntos,
                 );
 
                 // Llamar al provider
@@ -238,7 +253,7 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                     .actualizarUsuario(usuarioActualizado);
 
                 if (exito && context.mounted) {
-                  Navigator.pop(context); 
+                  Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Usuario actualizado correctamente'),
@@ -263,7 +278,6 @@ class _gestionUsuario extends State<GestionUsuariosView> {
     String dropdownValue = list.firstWhere(
       (c) => c == usuario.rol,
       orElse: () => list.first,
-
     );
 
     showDialog(
@@ -280,7 +294,9 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                   initialValue: dropdownValue,
                   icon: const Icon(Icons.arrow_downward),
                   elevation: 10,
-                  style: const TextStyle(color: Color.fromARGB(255, 17, 82, 17)),
+                  style: const TextStyle(
+                    color: Color.fromARGB(255, 17, 82, 17),
+                  ),
                   items: list.map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -293,7 +309,6 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                 ),
               ],
             ),
-
           ),
           actions: [
             TextButton(
@@ -305,10 +320,10 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                 backgroundColor: const Color(0xFF2E7D32),
               ),
               onPressed: () async {
-                final exito = await context
-                    .read<UsuarioProvider>()
-                    .cambiarRol(usuario.documento, dropdownValue);
-
+                final exito = await context.read<UsuarioProvider>().cambiarRol(
+                  usuario.documento,
+                  dropdownValue,
+                );
 
                 if (exito && context.mounted) {
                   Navigator.pop(context);
