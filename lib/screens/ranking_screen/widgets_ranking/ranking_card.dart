@@ -8,6 +8,7 @@ class RankingCard extends StatelessWidget {
   final Color borderColor;
   final Color positionColor;
   final IconData icon;
+  final String? avatarUrl; 
 
   const RankingCard({
     super.key,
@@ -18,6 +19,7 @@ class RankingCard extends StatelessWidget {
     this.borderColor = const Color(0xFF2B2B2B),
     this.positionColor = Colors.yellow,
     this.icon = Icons.account_box,
+    this.avatarUrl, // <-- Lo recibimos en el constructor
   });
 
   @override
@@ -44,19 +46,25 @@ class RankingCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
+          
+          // CUADRO DEL AVATAR / ÍCONO
           Container(
             width: 36,
             height: 36,
+            clipBehavior: Clip.hardEdge,
             decoration: BoxDecoration(
               color: const Color(0xFF0D140E),
               border: Border.all(color: const Color(0xFF333333)),
             ),
-            child: Icon(
-              icon,
-              size: 24,
-              color: const Color(0xFF00FF66),
-            ),
+            child: avatarUrl != null
+                ? Image.network(
+                    avatarUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => _buildDefaultIcon(),
+                  )
+                : _buildDefaultIcon(),
           ),
+          
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -117,6 +125,15 @@ class RankingCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // Extraje el ícono a un método pequeñito para reutilizarlo limpio
+  Widget _buildDefaultIcon() {
+    return Icon(
+      icon,
+      size: 24,
+      color: const Color(0xFF00FF66),
     );
   }
 }

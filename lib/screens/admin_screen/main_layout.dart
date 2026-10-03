@@ -9,7 +9,6 @@ import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:winbin/screens/admin_screen/dashboard_screen.dart';
-
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -35,6 +34,10 @@ class _MainLayoutState extends State<MainLayout> {
     if (mounted) {
       context.go('/login');
     }
+  }
+   Future<void> _home() async {
+      context.go('/home');
+ 
   }
 
   @override
@@ -141,7 +144,18 @@ class _MainLayoutState extends State<MainLayout> {
             ),
           ),
           const Divider(color: Colors.white30, indent: 20, endIndent: 20),
-          _buildNavItem(context, isMobile, 6, Icons.settings, 'Ajustes', isAction: true),
+          _buildNavItem(
+            context,
+            isMobile,
+            6,
+            Icons.supervised_user_circle,
+            'Aplicacion Usuario ',
+            isAction: true,
+            onTapCallback: () {
+              _home();
+             
+            },
+          ),
           _buildNavItem(
             context,
             isMobile,
@@ -153,6 +167,7 @@ class _MainLayoutState extends State<MainLayout> {
               _cerrarSesion();
             },
           ),
+          
           const SizedBox(height: 20),
         ],
       ),
