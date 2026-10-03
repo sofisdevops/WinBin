@@ -21,7 +21,7 @@ class Tableservices {
       headers: headers,
     );
     print(response.statusCode);
-    if(response.statusCode == 401) {
+    if (response.statusCode == 401) {
       throw UnauthorizedException();
     }
     if (response.statusCode == 200) {
@@ -55,13 +55,13 @@ class Tableservices {
         ? await http.put(url, headers: headers, body: jsonEncode(data))
         : await http.put(url, headers: headers);
     //print('este es el token ${token} ');
-    print('datos recubidos ${data}, y este es la respuest del back ${actualizar.body}',);
+    print(
+      'datos recubidos ${data}, y este es la respuest del back ${actualizar.body}',
+    );
 
-    if(actualizar.statusCode == 401) {
+    if (actualizar.statusCode == 401) {
       throw UnauthorizedException();
     }
-    
-
 
     return actualizar.statusCode == 200;
   }
@@ -80,12 +80,11 @@ class Tableservices {
       Uri.parse('$baseUrl/$endponit/$documento'),
       headers: headers,
     );
-    if(response.statusCode == 401) {
+    if (response.statusCode == 401) {
       throw UnauthorizedException();
     }
     return response.statusCode == 200;
   }
-
 
   Future<bool> activarUsuario(
     String endponit,
@@ -101,10 +100,33 @@ class Tableservices {
       Uri.parse('$baseUrl/$endponit/$documento/reactivar'),
       headers: headers,
     );
-    if(response.statusCode == 401) {
+    if (response.statusCode == 401) {
       throw UnauthorizedException();
     }
     return response.statusCode == 200;
   }
 
+  Future<bool> crearDato<T>(
+    String endpoint,
+    Map<String, dynamic> data,
+    String? token,
+  ) async {
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+
+    String urlString = '$baseUrl/$endpoint';
+
+    final url = Uri.parse(urlString);
+    final response = await http.post(
+      url,
+      body: jsonEncode(data),
+      headers: headers,
+    );
+    if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    }
+    return response.statusCode == 200;
+  }
 }

@@ -163,7 +163,10 @@ class GenericTable<T> extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double tableWidth = math.max(constraints.maxWidth, minWidth);
+        final double tableWidth = constraints.hasBoundedWidth
+            ? math.max(constraints.maxWidth, minWidth)
+            : minWidth;
+
         return ScrollConfiguration(
           behavior: ScrollConfiguration.of(context).copyWith(
             dragDevices: {
