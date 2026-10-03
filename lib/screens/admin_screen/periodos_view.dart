@@ -1,178 +1,432 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:winbin/models/perido_model.dart';
+import 'package:winbin/Providers/periodo_provider.dart';
+import './widgets_admin/tablaGenerica.dart';
 
-class PeriodosView extends StatelessWidget {
+class PeriodosView extends StatefulWidget {
   const PeriodosView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    const primaryGreen = Color(0xFF1B5E20);
-    const accentGreen = Color(0xFF2E7D32);
-    const softGreenBg = Color(0xFFE8F5E9);
+  State<PeriodosView> createState() => _PeriodosViewState();
+}
 
-    final isMobile = MediaQuery.of(context).size.width < 800;
+class _PeriodosViewState extends State<PeriodosView> {
+  final TextEditingController _nombreCtrl = TextEditingController();
+  final TextEditingController _fechaInicioCtrl = TextEditingController();
+  final TextEditingController _fechaFinCtrl = TextEditingController();
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Título y Subtítulo
-          const Text(
-            'Gestión de Periodos de Reciclaje',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: primaryGreen,
+  final Color primaryGreen = const Color(0xFF1B5E20);
+  final Color accentGreen = const Color(0xFF2E7D32);
+  final Color softGreenBg = const Color(0xFFE8F5E9);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PeriodoProvider>().fetchPeriodos();
+    });
+  }
+
+  @override
+  void dispose() {
+    _nombreCtrl.dispose();
+    _fechaInicioCtrl.dispose();
+    _fechaFinCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _seleccionarFecha(
+    BuildContext ctx,
+    TextEditingController controlador,
+  ) async {
+    final DateTime? seleccion = await showDatePicker(
+      context: ctx,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: primaryGreen,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
-          const SizedBox(height: 4),
-          const Text(
-            'Administra los ciclos de competición y establece fechas límite.',
-            style: TextStyle(color: Colors.black54, fontSize: 14),
-          ),
-          const SizedBox(height: 20),
+          child: child!,
+        );
+      },
+    );
 
-          Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Línea verde lateral
-                  Container(
-                    width: 8,
-                    color: primaryGreen,
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                      child: isMobile 
-                          ? _buildMobileActivePeriod(primaryGreen, accentGreen, softGreenBg)
-                          : _buildDesktopActivePeriod(primaryGreen, accentGreen, softGreenBg),
-                    ),
-                  ),
-                ],
+    if (seleccion != null) {
+      final String fechaFormateada =
+          "${seleccion.year}-${seleccion.month.toString().padLeft(2, '0')}-${seleccion.day.toString().padLeft(2, '0')}";
+      controlador.text = fechaFormateada;
+
+      if (mounted) setState(() {});
+    }
+  }
+
+  void _crearNuevoPeriodo() async {
+    print('nombre: ${_nombreCtrl.text}');
+    print('inicio: ${_fechaInicioCtrl.text}');
+    print('fin: ${_fechaFinCtrl.text}');
+    if (_nombreCtrl.text.isEmpty ||
+        _fechaInicioCtrl.text.isEmpty ||
+        _fechaFinCtrl.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, completa todos los campos')),
+      );
+      return;
+    }
+
+    final nuevoPeriodo = Periodo(
+      idPeriodo: '',
+      nombrePeriodo: _nombreCtrl.text,
+      fechaInicio: _fechaInicioCtrl.text,
+      fechaFin: _fechaFinCtrl.text,
+      activo: true,
+    );
+
+    final exito = await context.read<PeriodoProvider>().crearPeriodo(
+      nuevoPeriodo,
+    );
+
+    if (mounted) {
+      if (exito) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Periodo programado con éxito'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _nombreCtrl.clear();
+        _fechaInicioCtrl.clear();
+        _fechaFinCtrl.clear();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al programar el periodo'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+  void _mostrarModalEdicion(BuildContext context, Periodo periodo) {
+    final TextEditingController edNombreCtrl = TextEditingController(
+      text: periodo.nombrePeriodo,
+    );
+    final TextEditingController edInicioCtrl = TextEditingController(
+      text: periodo.fechaInicio,
+    );
+    final TextEditingController edFinCtrl = TextEditingController(
+      text: periodo.fechaFin,
+    );
+    bool edActivo = periodo.activo;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return AlertDialog(
+              title: const Text(
+                'Editar Periodo',
+                style: TextStyle(color: Color(0xFF1B5E20)),
               ),
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.calendar_today, color: primaryGreen, size: 20),
-                    SizedBox(width: 8),
-                    Text(
-                      'Nuevo Periodo Lectivo',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                    TextField(
+                      controller: edNombreCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Nombre del Periodo',
                       ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: edInicioCtrl,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Fecha de Inicio',
+                        suffixIcon: Icon(Icons.calendar_month),
+                      ),
+                      onTap: () async {
+                        await _seleccionarFecha(ctx, edInicioCtrl);
+                        setModalState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: edFinCtrl,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Fecha de Fin',
+                        suffixIcon: Icon(Icons.calendar_month),
+                      ),
+                      onTap: () async {
+                        await _seleccionarFecha(ctx, edFinCtrl);
+                        setModalState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    SwitchListTile(
+                      title: const Text('Estado Activo'),
+                      activeColor: primaryGreen,
+                      value: edActivo,
+                      onChanged: (val) {
+                        setModalState(() {
+                          edActivo = val;
+                        });
+                      },
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                
-                // Responsividad de los inputs de fechas
-                if (isMobile) ...[
-                  _buildInputField(
-                    label: 'Fecha de Inicio',
-                    hint: '05/12/2026',
-                    icon: Icons.calendar_month_outlined,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(color: Colors.grey),
                   ),
-                  const SizedBox(height: 16),
-                  _buildInputField(
-                    label: 'Fecha de Terminación',
-                    hint: '08/30/2026',
-                    icon: Icons.calendar_month_outlined,
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryGreen,
                   ),
-                ] else ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildInputField(
-                          label: 'Fecha de Inicio',
-                          hint: '05/12/2026',
-                          icon: Icons.calendar_month_outlined,
+                  onPressed: () async {
+                    final periodoActualizado = Periodo(
+                      idPeriodo: periodo.idPeriodo, // Mantenemos el ID original
+                      nombrePeriodo: edNombreCtrl.text,
+                      fechaInicio: edInicioCtrl.text,
+                      fechaFin: edFinCtrl.text,
+                      activo: edActivo,
+                    );
+
+                    final exito = await context
+                        .read<PeriodoProvider>()
+                        .actualizarPeriodo(periodoActualizado);
+                    if (exito && mounted) {
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Periodo actualizado'),
+                          backgroundColor: Colors.green,
                         ),
-                      ),
-                      const SizedBox(width: 16),
+                      );
+                    }
+                  },
+                  child: const Text(
+                    'Guardar',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
+    return Consumer<PeriodoProvider>(
+      builder: (context, provider, child) {
+        final periodoActivo = provider.periodos
+            .where((p) => p.activo)
+            .firstOrNull;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Gestión de Periodos de Reciclaje',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: primaryGreen,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Administra los ciclos de competición y establece fechas límite.',
+                style: TextStyle(color: Colors.black54, fontSize: 14),
+              ),
+              const SizedBox(height: 20),
+
+              Container(
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(width: 8, color: primaryGreen),
                       Expanded(
-                        child: _buildInputField(
-                          label: 'Fecha de Terminación',
-                          hint: '08/30/2026',
-                          icon: Icons.calendar_month_outlined,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                          child: periodoActivo != null
+                              ? (isMobile
+                                    ? _buildMobileActivePeriod(periodoActivo)
+                                    : _buildDesktopActivePeriod(periodoActivo))
+                              : const Center(
+                                  child: Text(
+                                    'No hay ningún periodo activo actualmente',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                     ],
                   ),
-                ],
-                
-                const SizedBox(height: 16),
-                
-                _buildInputField(
-                  label: 'Nombre del Periodo',
-                  hint: 'Ej: Trimestre 3 - 2026',
                 ),
-                const SizedBox(height: 24),
-                
-                SizedBox(
-                  width: isMobile ? double.infinity : null,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryGreen,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          color: primaryGreen,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Nuevo Periodo Lectivo',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    if (isMobile) ...[
+                      _buildInputField(
+                        label: 'Fecha de Inicio',
+                        hint: 'YYYY-MM-DD',
+                        icon: Icons.calendar_month_outlined,
+                        controller: _fechaInicioCtrl,
+                        onTap: () =>
+                            _seleccionarFecha(context, _fechaInicioCtrl),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 16),
+                      _buildInputField(
+                        label: 'Fecha de Terminación',
+                        hint: 'YYYY-MM-DD',
+                        icon: Icons.calendar_month_outlined,
+                        controller: _fechaFinCtrl,
+                        onTap: () => _seleccionarFecha(context, _fechaFinCtrl),
+                      ),
+                    ] else ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildInputField(
+                              label: 'Fecha de Inicio',
+                              hint: 'YYYY-MM-DD',
+                              icon: Icons.calendar_month_outlined,
+                              controller: _fechaInicioCtrl,
+                              onTap: () =>
+                                  _seleccionarFecha(context, _fechaInicioCtrl),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildInputField(
+                              label: 'Fecha de Terminación',
+                              hint: 'YYYY-MM-DD',
+                              icon: Icons.calendar_month_outlined,
+                              controller: _fechaFinCtrl,
+                              onTap: () =>
+                                  _seleccionarFecha(context, _fechaFinCtrl),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    _buildInputField(
+                      label: 'Nombre del Periodo',
+                      hint: 'Ej: Trimestre 3 - 2026',
+                      controller: _nombreCtrl,
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: isMobile ? double.infinity : null,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryGreen,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: provider.isLoading
+                            ? null
+                            : _crearNuevoPeriodo,
+                        child: provider.isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Programar Periodo',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
-                    onPressed: () {},
-                    child: const Text(
-                      'Programar Periodo',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Historial de Periodos',
@@ -181,85 +435,68 @@ class PeriodosView extends StatelessWidget {
                         fontSize: 16,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        isMobile ? 'Ver reporte' : 'Ver reporte completo',
-                        style: const TextStyle(
-                          color: primaryGreen,
-                          fontWeight: FontWeight.bold,
+                    const SizedBox(height: 12),
+
+                    if (provider.isLoading && provider.periodos.isEmpty)
+                      const Center(child: CircularProgressIndicator())
+                    else if (provider.periodos.isEmpty)
+                      const Center(child: Text("No hay periodos registrados"))
+                    else
+                      GenericTable<Periodo>(
+                        title: 'Periodos Registrados',
+                        columns: const ['Nombre', 'Inicio', 'Fin', 'Estado'],
+                        data: provider.periodos,
+                        rowsPerPage: 5,
+                        cellBuilders: [
+                          (p) => Text(
+                            p.nombrePeriodo,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          (p) => Text(p.fechaInicio),
+                          (p) => Text(p.fechaFin),
+                          (p) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: p.activo
+                                  ? softGreenBg
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              p.activo ? 'ACTIVO' : 'ARCHIVADO',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: p.activo ? accentGreen : Colors.black54,
+                              ),
+                            ),
+                          ),
+                        ],
+                        isRowActive: (p) => p.activo,
+                        onEdit: (p) => _mostrarModalEdicion(
+                          context,
+                          p,
                         ),
                       ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minWidth: 650),
-                    child: Table(
-                      columnWidths: const {
-                        0: FlexColumnWidth(2),
-                        1: FlexColumnWidth(1.5),
-                        2: FlexColumnWidth(1.5),
-                        3: FlexColumnWidth(1.5),
-                        4: FlexColumnWidth(1),
-                      },
-                      children: [
-                        TableRow(
-                          decoration: const BoxDecoration(color: softGreenBg),
-                          children: [
-                            _buildTableHeader('Periodo'),
-                            _buildTableHeader('Inicio'),
-                            _buildTableHeader('Fin'),
-                            _buildTableHeader('Total Reciclado'),
-                            _buildTableHeader('Estado'),
-                          ],
-                        ),
-                        _buildTableRow(
-                          'Trimestre 3 – 2026',
-                          'Jun 15, 2026',
-                          'Sep 31, 2026',
-                          '45,800 kg',
-                          'ACTUAL',
-                        ),
-                        _buildTableRow(
-                          'Trimestre 2 – 2026',
-                          'Mar 31, 2026',
-                          'Jun 15, 2026',
-                          '45,800 kg',
-                          'ARCHIVADO',
-                        ),
-                        _buildTableRow(
-                          'Trimestre 1 – 2026',
-                          'Ene 26, 2026',
-                          'Mar 30, 2026',
-                          '12,450 kg',
-                          'ARCHIVADO',
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildDesktopActivePeriod(Color primaryGreen, Color accentGreen, Color softGreenBg) {
+  Widget _buildDesktopActivePeriod(Periodo periodo) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: softGreenBg,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: softGreenBg, shape: BoxShape.circle),
           child: Icon(Icons.autorenew, color: accentGreen, size: 28),
         ),
         const SizedBox(width: 15),
@@ -268,47 +505,23 @@ class PeriodosView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Periodo Activo: Trimestre 3',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 4),
-              _buildRichTextDate(primaryGreen),
-            ],
-          ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 140,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: const LinearProgressIndicator(
-                  value: 0.85,
-                  minHeight: 10,
-                  backgroundColor: Color(0xFFC8E6C9),
-                  color: Color(0xFF66BB6A),
+              Text(
+                'Periodo Activo: ${periodo.nombrePeriodo}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              '85% Completado',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-                color: Colors.black87,
-              ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              _buildRichTextDate(periodo.fechaFin),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildMobileActivePeriod(Color primaryGreen, Color accentGreen, Color softGreenBg) {
+  Widget _buildMobileActivePeriod(Periodo periodo) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -327,74 +540,51 @@ class PeriodosView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Periodo Activo: Trimestre 3',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    'Periodo Activo: ${periodo.nombrePeriodo}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  _buildRichTextDate(primaryGreen),
+                  _buildRichTextDate(periodo.fechaFin),
                 ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: const LinearProgressIndicator(
-              value: 0.85,
-              minHeight: 10,
-              backgroundColor: Color(0xFFC8E6C9),
-              color: Color(0xFF66BB6A),
-            ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        const Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            '85% Completado',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-              color: Colors.black87,
-            ),
-          ),
-        ),
       ],
     );
   }
 
-  Widget _buildRichTextDate(Color primaryGreen) {
+  Widget _buildRichTextDate(String fechaFinStr) {
+    DateTime? fechaFin = DateTime.tryParse(fechaFinStr);
+    int diasRestantes = 0;
+    if (fechaFin != null) {
+      diasRestantes = fechaFin.difference(DateTime.now()).inDays;
+    }
     return Text.rich(
       TextSpan(
         text: 'Finaliza en ',
-        style: TextStyle(
-          color: Colors.grey.shade600,
-          fontSize: 13,
-        ),
+        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
         children: [
           TextSpan(
-            text: '12 días',
-            style: TextStyle(
-              color: primaryGreen,
-              fontWeight: FontWeight.bold,
-            ),
+            text: diasRestantes >= 0 ? '$diasRestantes días' : 'Vencido',
+            style: TextStyle(color: primaryGreen, fontWeight: FontWeight.bold),
           ),
-          const TextSpan(
-            text: ' (Miercoles, 31 de Septiembre)',
-          ),
+          TextSpan(text: ' ($fechaFinStr)'),
         ],
       ),
     );
   }
 
-  static Widget _buildInputField({
+  Widget _buildInputField({
     required String label,
     required String hint,
     IconData? icon,
+    required TextEditingController controller,
+    VoidCallback? onTap,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,6 +599,9 @@ class PeriodosView extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         TextField(
+          controller: controller,
+          readOnly: onTap != null,
+          onTap: onTap,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
@@ -427,79 +620,5 @@ class PeriodosView extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  static Widget _buildTableHeader(String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-          color: Colors.black87,
-        ),
-      ),
-    );
-  }
-
-  static TableRow _buildTableRow(
-    String periodo,
-    String inicio,
-    String fin,
-    String total,
-    String estado,
-  ) {
-    return TableRow(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: Text(
-            periodo,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: Text(
-            inicio,
-            style: const TextStyle(color: Color(0xFF393939), fontSize: 13),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: Text(
-            fin,
-            style: const TextStyle(color: Color(0xFF393939), fontSize: 13),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: Text(
-            total,
-            style: const TextStyle(color: Color(0xFF393939), fontSize: 13),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEEEEEE),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              estado,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Colors.black54,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  }  
 }

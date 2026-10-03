@@ -14,6 +14,8 @@ import 'Providers/auditoria_provider.dart';
 import 'Providers/dashboard_provider.dart';
 import 'package:winbin/screens/user_screen/profile_screen/profile_screen.dart';
 import './Providers/ranking_provider.dart';
+import 'Providers/periodo_provider.dart';
+import 'dart:ui';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -39,6 +41,7 @@ class AppRouterSetup {
 
         return null;
       },
+
       routes: [
         GoRoute(
           path: '/login',
@@ -50,13 +53,23 @@ class AppRouterSetup {
         ),
         GoRoute(
           path: '/admin',
-          builder: (context, state) => const MainLayout(),
           redirect: (context, state) {
-            final authProvider = context.read<AuthProvider>();
             if (authProvider.rol != 'ADMIN') {
               return '/home';
             }
-            return null;
+          },
+          builder: (context, state) {
+            final anchoPantalla = MediaQuery.sizeOf(context).width;
+
+            if (anchoPantalla < 800) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go('/home');
+              });
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return const MainLayout();
           },
         ),
         ShellRoute(
@@ -70,7 +83,7 @@ class AppRouterSetup {
             ),
             GoRoute(
               path: '/ranking',
-              builder: (context, state) =>RankingScreen(),
+              builder: (context, state) => RankingScreen(),
             ),
             GoRoute(
               path: '/perfil',
@@ -89,8 +102,13 @@ void main() async {
 
   final authProvider = AuthProvider();
   await authProvider.obtenerToken();
+
   if (authProvider.token != null) {
-    await authProvider.obtenerPerfilUsuario();
+    try {
+      await authProvider.obtenerPerfilUsuario();
+    } catch (e) {
+      authProvider.logout();
+    }
   }
 
   final router = AppRouterSetup.createRouter(authProvider);
@@ -105,11 +123,16 @@ void main() async {
             return usuarioProvider!..updateToken(authProvider.token);
           },
         ),
+        ChangeNotifierProxyProvider<AuthProvider, PeriodoProvider>(
+          create: (context) => PeriodoProvider(),
+          update: (context, authProvider, periodoProvider) {
+            return periodoProvider!..updateToken(authProvider.token);
+          },
+        ),
         ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
         ChangeNotifierProvider(create: (_) => AuditoriaProvider()),
         ChangeNotifierProvider(create: (_) => DashboardProvider()),
         ChangeNotifierProvider(create: (_) => RankingProvider()),
-
       ],
       child: MiAppWeb(router: router),
     ),
