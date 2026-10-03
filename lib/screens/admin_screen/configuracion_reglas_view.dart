@@ -1,36 +1,169 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../../Providers/categoriaPuntaje_provider.dart';
 
-class ConfiguracionReglasView extends StatelessWidget {
+class ConfiguracionReglasView extends StatefulWidget {
   const ConfiguracionReglasView({super.key});
 
   @override
+  State<ConfiguracionReglasView> createState() => _ConfiguracionReglas();
+}
+
+class _ConfiguracionReglas extends State<ConfiguracionReglasView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<CategoriaPuntajeProvider>(
+        context,
+        listen: false,
+      ).fetchPuntajeCategorias();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _construirEncabezado(),
-          const SizedBox(height: 30),
-          Center(
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 24,
-              runSpacing: 24,
+    return Consumer<CategoriaPuntajeProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF2E7D32)),
+          );
+        }
+
+        if (provider.errorMessage != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _construirTarjetaBotellas(),
-                _construirTarjetaCarton(),
+                Text('Error: ${provider.errorMessage}'),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => provider.fetchPuntajeCategorias(),
+                  child: const Text('Reintentar'),
+                ),
               ],
             ),
+          );
+        }
+
+        // Si la lista está vacía
+        if (provider.puntajeCategorias.isEmpty) {
+          return const Center(
+            child: Text('No hay configuraciones de puntaje disponibles.'),
+          );
+        }
+
+        final Map<String, List<dynamic>> categoriasAgrupadas = {};
+
+        for (var regla in provider.puntajeCategorias) {
+          final nombre = regla.id_material?.nombreMaterial ?? 'Sin Categoría';
+
+          if (!categoriasAgrupadas.containsKey(nombre)) {
+            categoriasAgrupadas[nombre] = [];
+          }
+          categoriasAgrupadas[nombre]!.add(regla);
+        }
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _construirEncabezado(),
+              const SizedBox(height: 30),
+              Center(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 24,
+                  runSpacing: 24,
+                  children: categoriasAgrupadas.entries.map((categoria) {
+                    final String nombreCategoria = categoria.key;
+                    final List<dynamic> listaReglas = categoria.value;
+
+                    return _construirTarjetaCategoria(
+                      icono: _obtenerIconoCategoria(nombreCategoria),
+                      titulo: nombreCategoria,
+
+                      children: listaReglas.map((categoria) {
+                        return CampoEntradaRegla(
+                          key: ValueKey(
+                            '${categoria.id_categoria}_${categoria.tamanno}',
+                          ),
+                          encabezado: categoria.tamanno.toUpperCase(),
+                          valorInicial: categoria.puntos,
+                          alCambiar: (nuevoTexto) {
+                            final nuevosPuntos = nuevoTexto;
+                            if (nuevosPuntos != null) {
+                              context
+                                  .read<CategoriaPuntajeProvider>()
+                                  .registrarCambioPuntaje(
+                                    categoria.id_categoria,
+                                    nuevosPuntos,
+                                  );
+
+                              context
+                                  .read<CategoriaPuntajeProvider>()
+                                  .actualizarPuntajeLocal(
+                                    categoria.id_categoria,
+                                    nuevosPuntos,
+                                  );
+                            }
+                          },
+                        );
+                      }).toList(),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 35),
+              Center(
+                child: _construirBotonGuardar(
+                  onPressed: () async {
+                    // Llamamos al método de guardado en la base de datos o API
+                    final provider = Provider.of<CategoriaPuntajeProvider>(
+                      context,
+                      listen: false,
+                    );
+
+                    final exito = await provider.guardarCambiosPuntajes();
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            exito
+                                ? '¡Reglas actualizadas correctamente!'
+                                : 'Error al actualizar las reglas en el servidor o sin cambios:.',
+                          ),
+                          backgroundColor: exito
+                              ? const Color(0xFF1B5E20)
+                              : Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 35),
-          Center(
-            child: _construirBotonGuardar(),
-          ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  // Método auxiliar para mapear un icono según el nombre de la categoría
+  Widget _obtenerIconoCategoria(String nombre) {
+    final nombreMinuscula = nombre.toLowerCase();
+    if (nombreMinuscula.contains('botella') ||
+        nombreMinuscula.contains('plástico')) {
+      return const Icon(Icons.water_drop, color: Color(0xFF2E7D32), size: 34);
+    } else if (nombreMinuscula.contains('cartón') ||
+        nombreMinuscula.contains('carton')) {
+      return const Icon(Icons.inventory_2, color: Color(0xFF2E7D32), size: 34);
+    }
+    return const Icon(Icons.category, color: Color(0xFF2E7D32), size: 34);
   }
 
   Widget _construirEncabezado() {
@@ -54,16 +187,14 @@ class ConfiguracionReglasView extends StatelessWidget {
     );
   }
 
-  Widget _construirBotonGuardar() {
+  Widget _construirBotonGuardar({required VoidCallback onPressed}) {
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF1B5E20),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      onPressed: () {},
+      onPressed: onPressed,
       icon: const Icon(Icons.save, color: Colors.white),
       label: const Text(
         'Guardar Cambios de Reglas',
@@ -76,71 +207,15 @@ class ConfiguracionReglasView extends StatelessWidget {
     );
   }
 
-  Widget _construirTarjetaBotellas() {
-    return _construirTarjetaCategoria(
-      icono: const Icon(Icons.water_drop, color: Color(0xFF2E7D32), size: 34),
-      titulo: 'Botella Plástica',
-      subtitulo: 'Botellas PED, PEAD y plásticos domésticos',
-      children: [
-        CampoEntradaRegla(
-          encabezado: 'PEQUEÑA',
-          valorInicial: 10,
-          descripcion: 'Capacidad 500ml',
-          alCambiar: (valor) {},
-        ),
-        CampoEntradaRegla(
-          encabezado: 'MEDIANA',
-          valorInicial: 20,
-          descripcion: 'Cantidad 500ml - 1.5L',
-          alCambiar: (valor) {},
-        ),
-        CampoEntradaRegla(
-          encabezado: 'GRANDE',
-          valorInicial: 50,
-          descripcion: 'Capacidad 5L',
-          alCambiar: (valor) {},
-        ),
-      ],
-    );
-  }
-
-  Widget _construirTarjetaCarton() {
-    return _construirTarjetaCategoria(
-      icono: const Icon(Icons.inventory_2, color: Color(0xFF2E7D32), size: 34),
-      titulo: 'Carton',
-      subtitulo: 'Retazos, pastas de cuaderno, cajas',
-      children: [
-        CampoEntradaRegla(
-          encabezado: 'RETAZO PEQUEÑO',
-          valorInicial: 10,
-          descripcion: 'Caja pequeña',
-          alCambiar: (valor) {},
-        ),
-        CampoEntradaRegla(
-          encabezado: 'RETAZO MEDIANO',
-          valorInicial: 20,
-          descripcion: 'Caja mediana',
-          alCambiar: (valor) {},
-        ),
-        CampoEntradaRegla(
-          encabezado: 'RETAZO GRANDE',
-          valorInicial: 50,
-          descripcion: 'Caja grande',
-          alCambiar: (valor) {},
-        ),
-      ],
-    );
-  }
-
   Widget _construirTarjetaCategoria({
     required Widget icono,
     required String titulo,
-    required String subtitulo,
+    String? subtitulo,
     required List<Widget> children,
   }) {
     return Container(
       width: 480,
-      height: 280,
+      constraints: const BoxConstraints(minHeight: 280),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: const Color(0xFFF7F5EE),
@@ -158,25 +233,30 @@ class ConfiguracionReglasView extends StatelessWidget {
                 children: [
                   icono,
                   const SizedBox(width: 12),
-                  Text(
-                    titulo,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C2C2C),
+                  Expanded(
+                    child: Text(
+                      titulo,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2C2C2C),
+                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
               Text(
-                subtitulo,
+                subtitulo ?? '',
                 style: const TextStyle(color: Color(0xFF6E6E6E), fontSize: 14),
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.spaceBetween,
             children: children,
           ),
         ],
@@ -188,14 +268,14 @@ class ConfiguracionReglasView extends StatelessWidget {
 class CampoEntradaRegla extends StatefulWidget {
   final String encabezado;
   final int valorInicial;
-  final String descripcion;
+  final String? descripcion;
   final ValueChanged<int>? alCambiar;
 
   const CampoEntradaRegla({
     super.key,
     required this.encabezado,
     required this.valorInicial,
-    required this.descripcion,
+    this.descripcion,
     this.alCambiar,
   });
 
@@ -212,6 +292,15 @@ class _CampoEntradaReglaState extends State<CampoEntradaRegla> {
     super.initState();
     _valor = widget.valorInicial;
     _controlador = TextEditingController(text: _valor.toString());
+  }
+
+  @override
+  void didUpdateWidget(covariant CampoEntradaRegla oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.valorInicial != widget.valorInicial) {
+      _valor = widget.valorInicial;
+      _controlador.text = _valor.toString();
+    }
   }
 
   @override
@@ -246,7 +335,6 @@ class _CampoEntradaReglaState extends State<CampoEntradaRegla> {
         color: const Color(0xFFECEAE4),
         borderRadius: BorderRadius.circular(12),
       ),
-      
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -269,7 +357,6 @@ class _CampoEntradaReglaState extends State<CampoEntradaRegla> {
               ),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(6.0),
             child: Container(
@@ -289,7 +376,9 @@ class _CampoEntradaReglaState extends State<CampoEntradaRegla> {
                           controller: _controlador,
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -318,7 +407,6 @@ class _CampoEntradaReglaState extends State<CampoEntradaRegla> {
                       ],
                     ),
                   ),
-
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -344,15 +432,11 @@ class _CampoEntradaReglaState extends State<CampoEntradaRegla> {
               ),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.only(bottom: 10.0, left: 4, right: 4),
             child: Text(
-              widget.descripcion,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF555555),
-              ),
+              widget.descripcion ?? '',
+              style: const TextStyle(fontSize: 11, color: Color(0xFF555555)),
               textAlign: TextAlign.center,
             ),
           ),
