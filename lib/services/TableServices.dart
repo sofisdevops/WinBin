@@ -129,4 +129,37 @@ class Tableservices {
     }
     return response.statusCode == 200;
   }
+  Future<bool> actualizarPatch(
+    String endponit,
+    dynamic id,
+    String? token,
+    dynamic data) async {
+  final url = Uri.parse('$baseUrl/$endponit/$id'); 
+
+  try {
+    final bodyData = jsonEncode(data);
+
+    final response = await http.patch(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+         if (token != null) 'Authorization': 'Bearer $token',
+        
+      },
+      body: bodyData,
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      print('Actualización exitosa');
+      return true;
+    } else {
+      print('Error en la API (${response.statusCode}): ${response.body}');
+      return false;
+    }
+  } catch (e) {
+    print('Error al conectar con el servidor: $e');
+    return false;
+  }
+}
+
 }

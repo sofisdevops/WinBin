@@ -42,7 +42,7 @@ class UsuarioProvider extends ChangeNotifier {
     } catch (e) {
       if (e is UnauthorizedException) {
         print('Sesión expirada detectada en UsuarioProvider');
-        _forzarCierreDeSesion();
+        forzarCierreDeSesion();
       } else {
         print('Error al buscar estudiantes: $e');
         _usuarios = [];
@@ -77,7 +77,7 @@ class UsuarioProvider extends ChangeNotifier {
     } catch (e) {
       if (e is UnauthorizedException) {
         print('Sesión expirada detectada en UsuarioProvider');
-        _forzarCierreDeSesion();
+        forzarCierreDeSesion();
       } else {
         print('Error al actualizar usuario: $e');
         _errorMessage = e.toString();
@@ -120,7 +120,7 @@ class UsuarioProvider extends ChangeNotifier {
   }
 
   // Cierra sesión y redirige al Login
-  void _forzarCierreDeSesion() {
+  void forzarCierreDeSesion() {
     final context = rootNavigatorKey.currentContext;
     if (context != null) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:winbin/Providers/categoriaPuntaje_provider.dart';
 import 'package:winbin/screens/ranking_screen/ranking_screen.dart';
 import 'screens/admin_screen/main_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -133,6 +134,12 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuditoriaProvider()),
         ChangeNotifierProvider(create: (_) => DashboardProvider()),
         ChangeNotifierProvider(create: (_) => RankingProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, CategoriaPuntajeProvider>(
+          create: (context) => CategoriaPuntajeProvider(),
+          update: (context, authProvider, CategoriaPuntajeProvider) {
+            return CategoriaPuntajeProvider!..updateToken(authProvider.token);
+          },
+        ),
       ],
       child: MiAppWeb(router: router),
     ),
