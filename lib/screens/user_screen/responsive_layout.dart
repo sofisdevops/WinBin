@@ -172,13 +172,8 @@ class ResponsiveLayout extends StatelessWidget {
                   color: Colors.white10,
                 ),
                 Expanded(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      bottomLeft: Radius.circular(20),
-                    ),
-                    child: child,
-                  ),
+                  child : child
+                  
                 ),
               ],
             ),

@@ -8,12 +8,12 @@ import 'Providers/UsuarioProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/screens/login_screens/login_screen.dart';
 import 'package:go_router/go_router.dart';
-import 'package:winbin/screens/admin_screen/main_layout.dart';
 import 'package:winbin/screens/login_screens/register_screen.dart';
 import 'Providers/gestion_puntos_provider.dart';
 import 'Providers/auditoria_provider.dart';
 import 'Providers/dashboard_provider.dart';
 import 'package:winbin/screens/user_screen/profile_screen/profile_screen.dart';
+import './Providers/ranking_provider.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -70,8 +70,7 @@ class AppRouterSetup {
             ),
             GoRoute(
               path: '/ranking',
-              builder: (context, state) =>
-                  const Scaffold(body: Center(child: Text('Vista Ranking'))),
+              builder: (context, state) =>RankingScreen(),
             ),
             GoRoute(
               path: '/perfil',
@@ -109,6 +108,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
         ChangeNotifierProvider(create: (_) => AuditoriaProvider()),
         ChangeNotifierProvider(create: (_) => DashboardProvider()),
+        ChangeNotifierProvider(create: (_) => RankingProvider()),
+
       ],
       child: MiAppWeb(router: router),
     ),

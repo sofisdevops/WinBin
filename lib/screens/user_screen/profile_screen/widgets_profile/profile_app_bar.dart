@@ -8,29 +8,31 @@ class ProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF141414),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.recycling, color: Color(0xFF00FF66), size: 22),
-              SizedBox(width: 8),
-              Text(
-                'WINBIN',
-                style: TextStyle(
-                  color: Color(0xFF00FF66),
-                  fontFamily: 'Courier',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.5,
+    return SafeArea(
+      child: Container(
+        color: const Color(0xFF141414),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.recycling, color: Color(0xFF00FF66), size: 22),
+                SizedBox(width: 8),
+                Text(
+                  'WINBIN',
+                  style: TextStyle(
+                    color: Color(0xFF00FF66),
+                    fontFamily: 'Courier',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
