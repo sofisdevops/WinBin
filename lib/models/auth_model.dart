@@ -69,6 +69,19 @@ class UsuarioPerfil {
     );
   }
 
+    Map<String, dynamic> toJson() {
+    return {
+      'activo': activo,
+      'avatarUrl': avatarUrl,
+      'contrasenna': contrasenna,
+      'curso': curso?.toJson(),
+      'documento': documento,
+      'nombre': nombre,
+      'puntos': puntos,
+      'rol': rol,
+    };
+  }
+
   UsuarioPerfil copyWith({
     bool? activo,
     String? avatarUrl,

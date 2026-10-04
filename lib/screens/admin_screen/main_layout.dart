@@ -9,6 +9,7 @@ import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:winbin/screens/admin_screen/dashboard_screen.dart';
+import 'package:winbin/screens/admin_screen/gestion_auditoria_view.dart';
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -21,6 +22,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final List<Widget> _views = const [
     DashboardContent(),
+    GestionAuditoriaView(),
     GestionPuntosView(),
     ConfiguracionReglasView(),
     PeriodosView(),
@@ -135,11 +137,12 @@ class _MainLayoutState extends State<MainLayout> {
               padding: EdgeInsets.zero,
               children: [
                 _buildNavItem(context, isMobile, 0, Icons.dashboard, 'Panel de Control'),
-                _buildNavItem(context, isMobile, 1, Icons.stars, 'Gestión de Puntos'),
-                _buildNavItem(context, isMobile, 2, Icons.rule, 'Configuración de Reglas'),
-                _buildNavItem(context, isMobile, 3, Icons.calendar_today, 'Periodos'),
-                _buildNavItem(context, isMobile, 4, Icons.bar_chart, 'Ranking'),
-                _buildNavItem(context, isMobile, 5, Icons.people, 'Gestión de Usuarios'),
+                _buildNavItem(context, isMobile, 1, Icons.library_books, 'Auditoria'),
+                _buildNavItem(context, isMobile, 2, Icons.stars, 'Gestión de Puntos'),
+                _buildNavItem(context, isMobile, 3, Icons.rule, 'Configuración de Reglas'),
+                _buildNavItem(context, isMobile, 4, Icons.calendar_today, 'Periodos'),
+                _buildNavItem(context, isMobile, 5, Icons.bar_chart, 'Ranking'),
+                _buildNavItem(context, isMobile, 6, Icons.people, 'Gestión de Usuarios'),
               ],
             ),
           ),

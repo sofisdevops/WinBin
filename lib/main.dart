@@ -16,7 +16,6 @@ import 'Providers/dashboard_provider.dart';
 import 'package:winbin/screens/user_screen/profile_screen/profile_screen.dart';
 import './Providers/ranking_provider.dart';
 import 'Providers/periodo_provider.dart';
-import 'dart:ui';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -130,16 +129,22 @@ void main() async {
             return periodoProvider!..updateToken(authProvider.token);
           },
         ),
-        ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
-        ChangeNotifierProvider(create: (_) => AuditoriaProvider()),
-        ChangeNotifierProvider(create: (_) => DashboardProvider()),
-        ChangeNotifierProvider(create: (_) => RankingProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, AuditoriaProvider>(
+          create: (context) => AuditoriaProvider(),
+          update: (context, authProvider, auditoriaProvider) {
+            return auditoriaProvider!..updateToken(authProvider.token);
+          },
+        ),
         ChangeNotifierProxyProvider<AuthProvider, CategoriaPuntajeProvider>(
           create: (context) => CategoriaPuntajeProvider(),
           update: (context, authProvider, CategoriaPuntajeProvider) {
             return CategoriaPuntajeProvider!..updateToken(authProvider.token);
           },
         ),
+        ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
+        ChangeNotifierProvider(create: (_) => DashboardProvider()),
+        ChangeNotifierProvider(create: (_) => RankingProvider()),
+        
       ],
       child: MiAppWeb(router: router),
     ),

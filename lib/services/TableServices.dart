@@ -33,6 +33,35 @@ class Tableservices {
     }
   }
 
+  Future<T> traerConParametros<T>({
+    required String endpoint,
+    required T Function(Map<String, dynamic> json) fromjson,
+    required String? token,
+    Map<String, dynamic>? queryParams,
+  }) async {
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+    Uri uri = Uri.parse('$baseUrl/$endpoint');
+    if (queryParams != null && queryParams.isNotEmpty) {
+      final Map<String, String> stringParams = queryParams.map(
+        (key, value) => MapEntry(key, value.toString()),
+      );
+      uri = uri.replace(queryParameters: stringParams);
+    }
+    final response = await http.get(uri, headers: headers);
+    if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    }
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonMap = jsonDecode(response.body);
+      return fromjson(jsonMap);
+    } else {
+      throw Exception('Error al cargar datos desde $endpoint');
+    }
+  }
+
   Future<bool> actualizar({
     required String endpoint,
     required dynamic documento,
