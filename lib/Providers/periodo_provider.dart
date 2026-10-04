@@ -52,20 +52,14 @@ class PeriodoProvider extends ChangeNotifier {
 
   Future<bool> actualizarPeriodo(Periodo periodoEditado) async {
     try {
-      final response = await _apiService.actualizar(
-        endpoint: 'PeriodoRanking',
-        documento: periodoEditado.idPeriodo,
-        data: {'activo': periodoEditado.activo},
-        token: _token,
+      final response = await _apiService.actualizarPatch(
+        'PeriodoRanking',
+        periodoEditado.idPeriodo,
+        _token,
+        periodoEditado.toJson(),
       );
       if (response) {
-        final index = _periodos.indexWhere(
-          (p) => p.idPeriodo == periodoEditado.idPeriodo,
-        );
-        if (index != -1) {
-          _periodos[index] = periodoEditado;
-          notifyListeners();
-        }
+        await fetchPeriodos();
         return true;
       }
       return false;

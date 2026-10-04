@@ -41,35 +41,35 @@ class _gestionUsuario extends State<GestionUsuariosView> {
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            elevation: 0,
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (isMobile) ...[
-                    const Text(
-                      'Resultados de Búsqueda',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Chip(
-                      label: Text(
-                        '${provider.usuarios.length} Estudiantes encontrados',
-                      ),
-                      backgroundColor: const Color(0xFFC8E6C9),
-                    ),
-                  ] else ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Gestión de Usuarios',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B5E20),
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Administra los usuarios del sistema.',
+                style: TextStyle(color: Colors.black54, fontSize: 14),
+              ),
+              const SizedBox(height: 20),
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (isMobile) ...[
                         const Text(
                           'Resultados de Búsqueda',
                           style: TextStyle(
@@ -77,81 +77,103 @@ class _gestionUsuario extends State<GestionUsuariosView> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const SizedBox(height: 10),
                         Chip(
                           label: Text(
                             '${provider.usuarios.length} Estudiantes encontrados',
                           ),
                           backgroundColor: const Color(0xFFC8E6C9),
                         ),
-                      ],
-                    ),
-                  ],
-
-                  const Divider(height: 30),
-
-                  GenericTable<Usuario>(
-                    title: 'Lista de Usuarios',
-                    columns: const [
-                      'Documento',
-                      'Nombre',
-                      'Activo',
-                      'Curso',
-                      'Puntos',
-                      'Rol',
-                      'AvatarUrl',
-                    ],
-                    data: provider.usuarios,
-                    cellBuilders: [
-                      (user) => Text(user.documento),
-                      (user) => Text(user.nombre),
-                      (user) => Text(user.activo.toString()),
-                      (user) => Text(user.curso?.nombre ?? 'sin Curso'),
-                      (user) => Text(user.puntos.toString()),
-                      (user) => Text(user.rol),
-                      (user) => ClipRRect(
-                        borderRadius: BorderRadius.circular(
-                          20,
-                        ), // Formato circular/avatar
-                        child: CachedNetworkImage(
-                          imageUrl: user.avatarUrl ?? '',
-                          width: 40,
-                          height: 40,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(
-                            Icons.account_circle,
-                            size: 40,
-                            color: Colors.grey,
-                          ),
+                      ] else ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Resultados de Búsqueda',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Chip(
+                              label: Text(
+                                '${provider.usuarios.length} Estudiantes encontrados',
+                              ),
+                              backgroundColor: const Color(0xFFC8E6C9),
+                            ),
+                          ],
                         ),
+                      ],
+
+                      const Divider(height: 30),
+
+                      GenericTable<Usuario>(
+                        title: 'Lista de Usuarios',
+                        columns: const [
+                          'Documento',
+                          'Nombre',
+                          'Activo',
+                          'Curso',
+                          'Puntos',
+                          'Rol',
+                          'AvatarUrl',
+                        ],
+                        data: provider.usuarios,
+                        cellBuilders: [
+                          (user) => Text(user.documento),
+                          (user) => Text(user.nombre),
+                          (user) => Text(user.activo.toString()),
+                          (user) => Text(user.curso?.nombre ?? 'sin Curso'),
+                          (user) => Text(user.puntos.toString()),
+                          (user) => Text(user.rol),
+                          (user) => ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              20,
+                            ), // Formato circular/avatar
+                            child: CachedNetworkImage(
+                              imageUrl: user.avatarUrl ?? '',
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => const Icon(
+                                Icons.account_circle,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ],
+                        onEdit: (user) {
+                          _showEditDialog(context, user);
+                        },
+                        onDelete: null,
+                        desactive: (user) {
+                          context.read<UsuarioProvider>().desactivar(
+                            user.documento,
+                          );
+                        },
+                        active: (user) {
+                          context.read<UsuarioProvider>().activarUsuario(
+                            user.documento,
+                          );
+                        },
+                        cambiarRol: (user) {
+                          _dialogRol(context, user);
+                        },
+                        isRowActive: (item) => item.activo,
                       ),
                     ],
-                    onEdit: (user) {
-                      _showEditDialog(context, user);
-                    },
-                    onDelete: null,
-                    desactive: (user) {
-                      context.read<UsuarioProvider>().desactivar(
-                        user.documento,
-                      );
-                    },
-                    active: (user) {
-                      context.read<UsuarioProvider>().activarUsuario(
-                        user.documento,
-                      );
-                    },
-                    cambiarRol: (user) {
-                      _dialogRol(context, user);
-                    },
-                    isRowActive: (item) => item.activo,
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         );
       },

@@ -7,8 +7,14 @@ import 'package:winbin/utils/api_exceptions.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/main.dart';
+import 'package:winbin/services/TableServices.dart';
+import 'package:winbin/models/auditoria_model.dart';
 
 class AuditoriaProvider with ChangeNotifier {
+
+  final Tableservices _apiService = Tableservices();
+
+  // Estados notificaciones 
   StompClient? _stompClient;
   bool _isConnected = false;
   final List<Map<String, dynamic>> _eventosAuditoria = [];
@@ -18,6 +24,28 @@ class AuditoriaProvider with ChangeNotifier {
 
   int get cantidadSinLeer =>
       _eventosAuditoria.where((e) => e['leido'] == false).length;
+
+  // Estados tabla auditoria
+
+  final List<Auditoria> _auditoriasTabla = []; 
+  int _currentPageTabla = 0;
+  bool _isLastPageTabla = false;
+  bool _isLoadingTabla = false;
+  String? _filtroAccionTabla;
+  String? _token;
+
+  String? _errorMessageTabla;
+
+  String? get errorMessageTabla => _errorMessageTabla;
+  bool get isLoadingTabla => _isLoadingTabla;
+  bool get hasMoreTabla => !_isLastPageTabla;
+  List<Auditoria> get auditoriasTabla => _auditoriasTabla;
+
+  void updateToken(String? token) {
+    _token = token;
+  }
+
+  // metodos notificaciones  websocket
 
   void conectar(String token) {
     if (_isConnected) return;
@@ -122,12 +150,63 @@ class AuditoriaProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      if (e is UnauthorizedException) {
-        debugPrint(e.mensaje); 
-        _forzarCierreDeSesion();
-      } else {
-        debugPrint('Error de red o parsing: $e');
+      _manejarErrores(e);
+    }
+  }
+
+  //Metodos de Tabla
+  Future<void> cargarTabla({bool refresh = false, String? accionFiltro}) async {
+    if (refresh) {
+      _currentPageTabla = 0;
+      _isLastPageTabla = false;
+      _auditoriasTabla.clear();
+      _filtroAccionTabla = accionFiltro;
+    }
+
+    if (_isLoadingTabla || _isLastPageTabla) return;
+
+    _isLoadingTabla = true;
+    notifyListeners();
+
+    try {
+      final Map<String, dynamic> parametros = {
+        'page': _currentPageTabla,
+        'size': 10000,
+        'sort': 'fecha,desc'
+      };
+      if (_filtroAccionTabla != null && _filtroAccionTabla!.isNotEmpty) {
+        parametros['accion'] = _filtroAccionTabla;
       }
+
+      final AuditoriaPage pagina = await _apiService.traerConParametros<AuditoriaPage>(
+        endpoint: 'auditoria', 
+        queryParams: parametros,
+        fromjson: (json) => AuditoriaPage.fromJson(json),
+        token: _token,
+      );
+
+      if (pagina.content != null) {
+        _auditoriasTabla.addAll(pagina.content!);
+      }
+
+      _isLastPageTabla = pagina.last ?? true;
+      _currentPageTabla++;
+      
+    } catch (e) {
+      _manejarErrores(e);
+    } finally {
+      _isLoadingTabla = false;
+      notifyListeners();
+    }
+  }
+
+  void _manejarErrores(dynamic e) {
+    if (e is UnauthorizedException) {
+      debugPrint(e.mensaje); 
+      _forzarCierreDeSesion();
+      _errorMessageTabla = 'Error al cargar auditorias: ${e.mensaje}';
+    } else {
+      _errorMessageTabla = 'Error al cargar auditorias: $e';
     }
   }
 
