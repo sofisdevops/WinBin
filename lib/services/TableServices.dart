@@ -35,7 +35,7 @@ class Tableservices {
 
   Future<T> traerConParametros<T>({
     required String endpoint,
-    required T Function(Map<String, dynamic> json) fromjson,
+    required T Function(dynamic json) fromjson,
     required String? token,
     Map<String, dynamic>? queryParams,
   }) async {
@@ -51,11 +51,12 @@ class Tableservices {
       uri = uri.replace(queryParameters: stringParams);
     }
     final response = await http.get(uri, headers: headers);
+    print(response.statusCode); 
     if (response.statusCode == 401) {
       throw UnauthorizedException();
     }
     if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonMap = jsonDecode(response.body);
+      final dynamic jsonMap = jsonDecode(response.body);
       return fromjson(jsonMap);
     } else {
       throw Exception('Error al cargar datos desde $endpoint');

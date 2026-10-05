@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:winbin/models/auditoria_model.dart';
 import 'package:winbin/Providers/auditoria_provider.dart';
 import './widgets_admin/tablaGenerica.dart';
+import '../../utils/formatear_hora.dart';
 
 class GestionAuditoriaView extends StatefulWidget {
   const GestionAuditoriaView({super.key});
@@ -169,7 +170,7 @@ class _GestionAuditoriaViewState extends State<GestionAuditoriaView> {
                         data: provider.auditoriasTabla,
                         cellBuilders: [
                           (auditoria) => Text(auditoria.idAuditoria.toString()),
-                          (auditoria) => Text(auditoria.fecha.toString()),
+                          (auditoria) => Text(formatearHoraColombiana(auditoria.fecha)),
                           (auditoria) => Text(auditoria.accion.toString()),
                           (auditoria) =>
                               Text(auditoria.tablaAfectada.toString()),
