@@ -4,7 +4,7 @@ class DetalleSessionResponse {
   final String? idSesion;
   final UsuarioPerfil documento;
   final DateTime?fechaHora;
-  final int? idCategoria;
+  final Categoria? categoria;
   final Periodo idPeriodo;
 
   DetalleSessionResponse({
@@ -12,7 +12,7 @@ class DetalleSessionResponse {
     required this.idPeriodo,
     this.idSesion,
     this.fechaHora,
-    this.idCategoria,
+    this.categoria,
 
   });
 
@@ -22,8 +22,24 @@ class DetalleSessionResponse {
       documento: UsuarioPerfil.fromJson(json['documento'] ?? {}),
       idPeriodo: Periodo.fromJson(json['id_periodo'] ?? {}),
       fechaHora: json['fechaHora'] != null ? DateTime.parse(json['fechaHora']) : null,
-      idCategoria: json['idCategoria'],
+      categoria: json['idCategoria'] != null ? Categoria.fromJson(json['idCategoria']) : null,
     );
   }
-
 }
+
+class Categoria {
+  final int? idCategoria;
+  final String? tamanno;
+  final int? puntos;
+
+  Categoria({this.idCategoria, this.tamanno, this.puntos});
+
+  factory Categoria.fromJson(Map<String, dynamic> json) {
+    return Categoria(
+      idCategoria: json['id_categoria'],
+      tamanno: json['tamanno'],
+      puntos: json['puntos'],
+    );
+  }
+}
+

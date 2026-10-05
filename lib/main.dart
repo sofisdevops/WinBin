@@ -16,6 +16,7 @@ import 'Providers/dashboard_provider.dart';
 import 'package:winbin/screens/user_screen/profile_screen/profile_screen.dart';
 import './Providers/ranking_provider.dart';
 import 'Providers/periodo_provider.dart';
+import 'Providers/session_povider.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -123,6 +124,12 @@ void main() async {
             return usuarioProvider!..updateToken(authProvider.token);
           },
         ),
+        ChangeNotifierProxyProvider<AuthProvider, SessionProvider>(
+          create: (context) => SessionProvider(),
+          update: (context, authProvider, sessionProvider) {
+            return sessionProvider!..updateToken(authProvider.token);
+          },
+        ),
         ChangeNotifierProxyProvider<AuthProvider, PeriodoProvider>(
           create: (context) => PeriodoProvider(),
           update: (context, authProvider, periodoProvider) {
@@ -160,6 +167,7 @@ class MiAppWeb extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'WIN BIN :D',
+      
       theme: ThemeData(fontFamily: 'Courier'),
       routerConfig: router,
     );
