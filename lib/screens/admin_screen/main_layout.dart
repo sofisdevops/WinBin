@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:winbin/screens/admin_screen/dashboard_screen.dart';
 import 'package:winbin/screens/admin_screen/gestion_auditoria_view.dart';
 import 'package:winbin/screens/admin_screen/gestion_sessione_view.dart';
+import 'package:winbin/screens/admin_screen/gestion_cursoso_view.dart';
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -30,6 +31,7 @@ class _MainLayoutState extends State<MainLayout> {
     RankingView(),
     GestionUsuariosView(),
     GestionSessionView(),
+    GestionCursoView(),
   ];
 
   Future<void> _cerrarSesion() async {
@@ -146,6 +148,7 @@ class _MainLayoutState extends State<MainLayout> {
                 _buildNavItem(context, isMobile, 5, Icons.bar_chart, 'Ranking'),
                 _buildNavItem(context, isMobile, 6, Icons.people, 'Gestión de Usuarios'),
                 _buildNavItem(context, isMobile, 7, Icons.person_outline, 'Gestión de Sesiones'),
+                _buildNavItem(context, isMobile, 8, Icons.school, 'Gestión de Cursos')
               ],
             ),
           ),

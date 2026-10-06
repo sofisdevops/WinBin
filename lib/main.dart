@@ -17,6 +17,7 @@ import 'package:winbin/screens/user_screen/profile_screen/profile_screen.dart';
 import './Providers/ranking_provider.dart';
 import 'Providers/periodo_provider.dart';
 import 'Providers/session_povider.dart';
+import 'Providers/cursos_provider.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -122,6 +123,12 @@ void main() async {
           create: (context) => UsuarioProvider(),
           update: (context, authProvider, usuarioProvider) {
             return usuarioProvider!..updateToken(authProvider.token);
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, CursosProvider>(
+          create: (context) => CursosProvider(),
+          update: (context, authProvider, cursoProvider) {
+            return cursoProvider!..updateToken(authProvider.token);
           },
         ),
         ChangeNotifierProxyProvider<AuthProvider, SessionProvider>(
