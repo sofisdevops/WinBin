@@ -69,7 +69,7 @@ class UsuarioPerfil {
     );
   }
 
-    Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'activo': activo,
       'avatarUrl': avatarUrl,
