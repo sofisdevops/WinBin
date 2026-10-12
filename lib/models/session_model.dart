@@ -4,8 +4,8 @@ class DetalleSessionResponse {
   final String? idSesion;
   final UsuarioPerfil documento;
   final DateTime?fechaHora;
-  final Categoria? categoria;
-  final Periodo idPeriodo;
+  final int? categoria;
+  final String? idPeriodo;
 
   DetalleSessionResponse({
     required this.documento,
@@ -20,9 +20,9 @@ class DetalleSessionResponse {
     return DetalleSessionResponse(
       idSesion: json['id_session'],
       documento: UsuarioPerfil.fromJson(json['documento'] ?? {}),
-      idPeriodo: Periodo.fromJson(json['id_periodo'] ?? {}),
+      idPeriodo: json['id_periodo'],
       fechaHora: json['fechaHora'] != null ? DateTime.parse(json['fechaHora']) : null,
-      categoria: json['idCategoria'] != null ? Categoria.fromJson(json['idCategoria']) : null,
+      categoria: json['idCategoria'],
     );
   }
 }

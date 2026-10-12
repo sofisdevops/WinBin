@@ -347,7 +347,7 @@ class _GestionSessionViewState extends State<GestionSessionView> {
                             (detalle) => Text(detalle.idSesion.toString()),
                             (detalle) => Text(formatearHoraColombiana(detalle.fechaHora)),
                             (detalle) => Text(detalle.documento?.documento ?? 'N/A'),
-                            (detalle) => Text(detalle.idPeriodo?.nombrePeriodo?.toString() ?? 'N/A'),
+                            (detalle) => Text(detalle.idPeriodo.toString() ?? 'N/A'),
                           ],
                         ),
                       ],

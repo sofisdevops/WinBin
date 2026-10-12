@@ -100,7 +100,6 @@ class _GestionCursoViewState extends State<GestionCursoView> {
                     const SizedBox(height: 10),
                     TextField(
                       controller: edPuntosCtrl,
-                      readOnly: true,
                       decoration: const InputDecoration(
                         labelText: 'Puntos Totales',
                       ),

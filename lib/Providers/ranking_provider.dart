@@ -21,6 +21,22 @@ class RankingProvider with ChangeNotifier {
   List<dynamic> get topCursos => _topCursos;
   bool get isConnected => _isConnected;
 
+  String get mejorEstudiante {
+    if (_topEstudiantes.isEmpty) return 'No hay estudiantes';
+    final top = _topEstudiantes.first;
+    String nombreUsuario = top['nombre'] ?? 'No disponible';
+    String puntosUsuario = top['puntos'].toString();
+    return '$nombreUsuario - ($puntosUsuario puntos)';
+  }
+
+  String get mejorCurso {
+    if (_topCursos.isEmpty) return 'No hay cursos';
+    final top = _topCursos.first;
+    String nombreCurso = top['nombreCurso'] ?? 'No disponible';
+    String puntosCurso = top['puntosTotales'].toString();
+    return '$nombreCurso - ($puntosCurso puntos)';
+  }
+
   //Paginación de Estudiantes
 
   List<RankingUserModel> _usuarios = [];
@@ -204,6 +220,8 @@ class RankingProvider with ChangeNotifier {
     _stompClient = StompClient(
       config: StompConfig(
         url: socketUrl,
+        heartbeatIncoming: const Duration(seconds: 10),
+        heartbeatOutgoing: const Duration(seconds: 10),
         onConnect: (StompFrame frame) {
           _isConnected = true;
           print("¡CONEXIÓN WS LISTA EN PROVIDER TOP 10!");
