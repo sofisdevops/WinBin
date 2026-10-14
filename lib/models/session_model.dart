@@ -3,7 +3,7 @@ import 'auth_model.dart';
 class DetalleSessionResponse {
   final String? idSesion;
   final UsuarioPerfil documento;
-  final DateTime?fechaHora;
+  final DateTime? fechaHora;
   final int? categoria;
   final String? idPeriodo;
 
@@ -13,15 +13,18 @@ class DetalleSessionResponse {
     this.idSesion,
     this.fechaHora,
     this.categoria,
-
   });
 
   factory DetalleSessionResponse.fromJson(Map<String, dynamic> json) {
     return DetalleSessionResponse(
       idSesion: json['id_session'],
       documento: UsuarioPerfil.fromJson(json['documento'] ?? {}),
-      idPeriodo: json['id_periodo'],
-      fechaHora: json['fechaHora'] != null ? DateTime.parse(json['fechaHora']) : null,
+      idPeriodo: json['id_periodo'] is Map
+          ? json['id_periodo']['id_periodo']?.toString()
+          : json['id_periodo']?.toString(),
+      fechaHora: json['fechaHora'] != null
+          ? DateTime.parse(json['fechaHora'])
+          : null,
       categoria: json['idCategoria'],
     );
   }
@@ -42,4 +45,3 @@ class Categoria {
     );
   }
 }
-

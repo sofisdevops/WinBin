@@ -26,9 +26,7 @@ class SessionProvider extends ChangeNotifier {
     Map<String, int> conteoSesiones = {};
 
     for (var sesion in _sesiones) {
-      String identificador =
-          sesion.documento.nombre;
-
+      String identificador = sesion.documento.nombre;
 
       conteoSesiones[identificador] = (conteoSesiones[identificador] ?? 0) + 1;
     }
@@ -99,6 +97,14 @@ class SessionProvider extends ChangeNotifier {
                 .toList(),
             token: _token,
           );
+
+      listaSesiones.sort((a, b) {
+        if (a.fechaHora == null && b.fechaHora == null) return 0;
+        if (a.fechaHora == null) return 1;
+        if (b.fechaHora == null) return -1;
+
+        return b.fechaHora!.compareTo(a.fechaHora!);
+      });
       if (listaSesiones.isNotEmpty) {
         _sesiones.addAll(listaSesiones);
       }
