@@ -8,10 +8,9 @@ class ResponsiveLayout extends StatelessWidget {
   const ResponsiveLayout({super.key, required this.child});
 
   int _getSelectedIndex(String location) {
-    if (location.startsWith('/home')) return 0;
-    if (location.startsWith('/ranking')) return 1;
-    if (location.startsWith('/perfil')) return 2;
-    if (location.startsWith('/admin')) return 3;
+    if (location.startsWith('/ranking')) return 0;
+    if (location.startsWith('/perfil')) return 1;
+    if (location.startsWith('/admin')) return 2;
     return 0;
   }
 
@@ -19,18 +18,15 @@ class ResponsiveLayout extends StatelessWidget {
     if (isAdmin) {
       switch (index) {
         case 0:
-          context.go('/home');
-          break;
-        case 1:
           context.go('/ranking');
           break;
-        case 2:
+        case 1:
           context.go('/perfil');
           break;
-        case 3:
+        case 2:
           context.go('/admin');
           break;
-        case 4:
+        case 3:
           authProvider.logout(); 
           context.go('/login');
           break;
@@ -38,15 +34,12 @@ class ResponsiveLayout extends StatelessWidget {
     } else {
       switch (index) {
         case 0:
-          context.go('/home');
-          break;
-        case 1:
           context.go('/ranking');
           break;
-        case 2:
+        case 1:
           context.go('/perfil');
           break;
-        case 3:
+        case 2:
           authProvider.logout(); 
           context.go('/login');
           break;
@@ -66,10 +59,6 @@ class ResponsiveLayout extends StatelessWidget {
       currentIndex = 0;
     }
     final bottomItems = <BottomNavigationBarItem>[
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.home_outlined),
-        label: 'Inicio',
-      ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.emoji_events),
         label: 'Ranking',
@@ -142,10 +131,6 @@ class ResponsiveLayout extends StatelessWidget {
                     ),
                   ),
                   destinations: [
-                    const NavigationRailDestination(
-                      icon: Icon(Icons.home_outlined),
-                      label: Text('Inicio'),
-                    ),
                     const NavigationRailDestination(
                       icon: Icon(Icons.emoji_events_outlined),
                       label: Text('Ranking'),

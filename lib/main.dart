@@ -18,6 +18,7 @@ import './Providers/ranking_provider.dart';
 import 'Providers/periodo_provider.dart';
 import 'Providers/session_povider.dart';
 import 'Providers/cursos_provider.dart';
+import 'dart:io';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -38,7 +39,7 @@ class AppRouterSetup {
         }
 
         if (estaLogueado && vaAVistaPublica) {
-          return authProvider.rol == 'ADMIN' ? '/admin' : '/home';
+          return authProvider.rol == 'ADMIN' ? '/admin' : '/ranking';
         }
 
         return null;
@@ -57,7 +58,7 @@ class AppRouterSetup {
           path: '/admin',
           redirect: (context, state) {
             if (authProvider.rol != 'ADMIN') {
-              return '/home';
+              return '/ranking';
             }
           },
           builder: (context, state) {
@@ -65,7 +66,7 @@ class AppRouterSetup {
 
             if (anchoPantalla < 800) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go('/home');
+                context.go('/ranking');
               });
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
@@ -78,11 +79,6 @@ class AppRouterSetup {
           navigatorKey: shellNavigatorKey,
           builder: (context, state, child) => ResponsiveLayout(child: child),
           routes: [
-            GoRoute(
-              path: '/home',
-              builder: (context, state) =>
-                  const Scaffold(body: Center(child: Text('Vista Home'))),
-            ),
             GoRoute(
               path: '/ranking',
               builder: (context, state) => RankingScreen(),
@@ -98,8 +94,16 @@ class AppRouterSetup {
   }
 }
 
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate? cert, String host, int port) => true;
+  }
+}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
   await dotenv.load(fileName: ".env");
 
   final authProvider = AuthProvider();
@@ -158,7 +162,6 @@ void main() async {
         ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
         ChangeNotifierProvider(create: (_) => DashboardProvider()),
         ChangeNotifierProvider(create: (_) => RankingProvider()),
-        
       ],
       child: MiAppWeb(router: router),
     ),
@@ -174,7 +177,7 @@ class MiAppWeb extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'WIN BIN :D',
-      
+
       theme: ThemeData(fontFamily: 'Courier'),
       routerConfig: router,
     );

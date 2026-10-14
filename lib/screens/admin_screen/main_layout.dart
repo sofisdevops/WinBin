@@ -42,7 +42,7 @@ class _MainLayoutState extends State<MainLayout> {
     }
   }
    Future<void> _home() async {
-      context.go('/home');
+      context.go('/ranking');
  
   }
 

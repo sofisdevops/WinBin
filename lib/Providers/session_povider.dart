@@ -20,6 +20,31 @@ class SessionProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  String get topUsuarioSesiones {
+    if (_sesiones.isEmpty) return 'No hay sesiones registradas';
+
+    Map<String, int> conteoSesiones = {};
+
+    for (var sesion in _sesiones) {
+      String identificador = sesion.documento.nombre;
+
+      conteoSesiones[identificador] = (conteoSesiones[identificador] ?? 0) + 1;
+    }
+    String topUser = 'N/A';
+    int maxSesiones = 0;
+
+    conteoSesiones.forEach((user, count) {
+      if (count > maxSesiones) {
+        maxSesiones = count;
+        topUser = user;
+      }
+    });
+    print(topUser);
+    print(maxSesiones);
+
+    return '$topUser  ($maxSesiones sesiones)';
+  }
+
   String? _token;
 
   void updateToken(String? token) {
@@ -72,6 +97,14 @@ class SessionProvider extends ChangeNotifier {
                 .toList(),
             token: _token,
           );
+
+      listaSesiones.sort((a, b) {
+        if (a.fechaHora == null && b.fechaHora == null) return 0;
+        if (a.fechaHora == null) return 1;
+        if (b.fechaHora == null) return -1;
+
+        return b.fechaHora!.compareTo(a.fechaHora!);
+      });
       if (listaSesiones.isNotEmpty) {
         _sesiones.addAll(listaSesiones);
       }

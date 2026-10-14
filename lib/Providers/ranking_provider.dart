@@ -10,10 +10,15 @@ import 'package:winbin/main.dart';
 import '../models/ranking_model.dart';
 
 class RankingProvider with ChangeNotifier {
+
+  
   StompClient? _stompClient;
   bool _isConnected = false;
 
-  //  TOP 10 (WebSockets y Carga Inicial)
+  bool _hasWsError = false;
+  bool get hasWsError => _hasWsError;
+
+  // TOP 10 (WebSockets y Carga Inicial)
   List<dynamic> _topEstudiantes = [];
   List<dynamic> _topCursos = [];
 
@@ -21,8 +26,23 @@ class RankingProvider with ChangeNotifier {
   List<dynamic> get topCursos => _topCursos;
   bool get isConnected => _isConnected;
 
-  //Paginación de Estudiantes
+  String get mejorEstudiante {
+    if (_topEstudiantes.isEmpty) return 'No hay estudiantes';
+    final top = _topEstudiantes.first;
+    String nombreUsuario = top['nombre'] ?? 'No disponible';
+    String puntosUsuario = top['puntos'].toString();
+    return '$nombreUsuario ($puntosUsuario puntos)';
+  }
 
+  String get mejorCurso {
+    if (_topCursos.isEmpty) return 'No hay cursos';
+    final top = _topCursos.first;
+    String nombreCurso = top['nombreCurso'] ?? 'No disponible';
+    String puntosCurso = top['puntosTotales'].toString();
+    return '$nombreCurso ($puntosCurso puntos)';
+  }
+
+  // Paginación de Estudiantes
   List<RankingUserModel> _usuarios = [];
   bool _isLoading = false;
   int _currentPage = 1; 
@@ -42,9 +62,17 @@ class RankingProvider with ChangeNotifier {
   bool get isLoadingCursos => _isLoadingCursos;
   bool get hasMoreDataCursos => _hasMoreDataCursos;
 
+  /// Método de notificación segura para evitar colisiones en Flutter Web
+  void _safeNotifyListeners() {
+    if (!hasListeners) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (hasListeners) {
+        notifyListeners();
+      }
+    });
+  }
 
-  
-  //  Paginación de Estudiantes
+  // Paginación de Estudiantes
   Future<void> fetchRanking(String token, {bool refresh = false}) async {
     if (_isLoading || (!_hasMoreData && !refresh)) return;
 
@@ -55,7 +83,7 @@ class RankingProvider with ChangeNotifier {
     }
 
     _isLoading = true;
-    notifyListeners(); 
+    _safeNotifyListeners(); 
 
     try {
       final String baseUrl = dotenv.env['BACKEND_API_URL'] ?? ''; 
@@ -92,10 +120,9 @@ class RankingProvider with ChangeNotifier {
       }
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
-
 
   // Paginación de Cursos
   Future<void> fetchRankingCursos(String token, {bool refresh = false}) async {
@@ -108,7 +135,7 @@ class RankingProvider with ChangeNotifier {
     }
 
     _isLoadingCursos = true;
-    notifyListeners(); 
+    _safeNotifyListeners(); 
 
     try {
       final String baseUrl = dotenv.env['BACKEND_API_URL'] ?? ''; 
@@ -145,7 +172,7 @@ class RankingProvider with ChangeNotifier {
       }
     } finally {
       _isLoadingCursos = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -164,7 +191,7 @@ class RankingProvider with ChangeNotifier {
       }
       if (resEstudiantes.statusCode == 200) {
         final decodedData = json.decode(utf8.decode(resEstudiantes.bodyBytes));
-         if (decodedData is List) {
+        if (decodedData is List) {
           _topEstudiantes = decodedData;
         }
       }
@@ -183,9 +210,9 @@ class RankingProvider with ChangeNotifier {
         }
       }
 
-      notifyListeners();
+      _safeNotifyListeners();
     } catch (e) {
-       if (e is UnauthorizedException) {
+      if (e is UnauthorizedException) {
         debugPrint(e.mensaje); 
         _forzarCierreDeSesion();
       } else {
@@ -197,6 +224,7 @@ class RankingProvider with ChangeNotifier {
   // WebSockets
   void conectar(String token) async {
     if (_isConnected) return;
+    _hasWsError = false;
     await cargarRankingsIniciales(token);
 
     final String socketUrl = dotenv.env['WS_URL'] ?? '';
@@ -204,10 +232,13 @@ class RankingProvider with ChangeNotifier {
     _stompClient = StompClient(
       config: StompConfig(
         url: socketUrl,
+        heartbeatIncoming: const Duration(seconds: 10),
+        heartbeatOutgoing: const Duration(seconds: 10),
         onConnect: (StompFrame frame) {
           _isConnected = true;
+          _hasWsError = false;
           print("¡CONEXIÓN WS LISTA EN PROVIDER TOP 10!");
-          notifyListeners();
+          _safeNotifyListeners();
           
           _stompClient?.subscribe(
             destination: '/topic/ranking/estudiantes-top10',
@@ -215,7 +246,7 @@ class RankingProvider with ChangeNotifier {
               if (frame.body != null) {
                 try {
                   _topEstudiantes = json.decode(frame.body!);
-                  notifyListeners(); 
+                  _safeNotifyListeners(); 
                 } catch (e) {
                   print(" ERROR PARSEANDO LISTA ESTUDIANTES WS: $e");
                 }
@@ -229,7 +260,7 @@ class RankingProvider with ChangeNotifier {
               if (frame.body != null) {
                 try {
                   _topCursos = json.decode(frame.body!);
-                  notifyListeners();
+                  _safeNotifyListeners();
                 } catch (e) {
                   print(" ERROR PARSEANDO LISTA CURSOS WS: $e");
                 }
@@ -237,7 +268,15 @@ class RankingProvider with ChangeNotifier {
             },
           );
         },
-        onWebSocketError: (dynamic error) => print('Error WS Ranking: $error'),
+        onWebSocketError: (dynamic error) {
+          debugPrint('Error WS Ranking: $error');
+          _hasWsError = true;
+          _safeNotifyListeners();
+        },
+        onDisconnect: (frame) {
+          _isConnected = false;
+          _safeNotifyListeners();
+        },
       ),
     );
 
@@ -246,14 +285,22 @@ class RankingProvider with ChangeNotifier {
 
   void desconectar() {
     _stompClient?.deactivate();
+    _stompClient = null;
     _isConnected = false;
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _stompClient?.deactivate();
+    _stompClient = null;
+    super.dispose();
   }
 
   // Utilidades
   void _forzarCierreDeSesion() {
     final context = rootNavigatorKey.currentContext;
-    if (context != null) {
+    if (context != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Tu sesión expiró. Vuelve a ingresar.'),

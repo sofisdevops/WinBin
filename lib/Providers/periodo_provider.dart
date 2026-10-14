@@ -33,6 +33,14 @@ class PeriodoProvider extends ChangeNotifier {
         fromjson: (json) => Periodo.fromJson(json),
         token: _token,
       );
+
+      _periodos.sort((a, b) {
+        if (a.fechaInicio == null && b.fechaInicio == null) return 0;
+        if (a.fechaInicio == null) return 1;
+        if (b.fechaInicio == null) return -1;
+
+        return b.fechaInicio!.compareTo(a.fechaInicio!);
+      });
     } on UnauthorizedException {
       rethrow;
     } catch (e) {

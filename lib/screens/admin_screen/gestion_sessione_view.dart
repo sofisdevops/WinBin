@@ -339,15 +339,15 @@ class _GestionSessionViewState extends State<GestionSessionView> {
                           columns: const [
                             'Id',
                             'Fecha',
-                            'Documento',
+                            'Documento - Nombre ',
                             'Periodo',
                           ],
                           data: provider.sesiones,
                           cellBuilders: [
                             (detalle) => Text(detalle.idSesion.toString()),
                             (detalle) => Text(formatearHoraColombiana(detalle.fechaHora)),
-                            (detalle) => Text(detalle.documento?.documento ?? 'N/A'),
-                            (detalle) => Text(detalle.idPeriodo?.nombrePeriodo?.toString() ?? 'N/A'),
+                            (detalle) => Text('${detalle.documento?.documento ?? 'N/A'} - (${detalle.documento?.nombre ?? 'N/A'})'),
+                            (detalle) => Text(detalle.idPeriodo.toString() ?? 'N/A'),
                           ],
                         ),
                       ],

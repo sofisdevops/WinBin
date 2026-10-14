@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:winbin/Providers/auditoria_provider.dart';
+import 'package:winbin/utils/formatear_hora.dart';
 
 class HeaderBar extends StatefulWidget {
   const HeaderBar({super.key});
@@ -11,11 +11,12 @@ class HeaderBar extends StatefulWidget {
   State<HeaderBar> createState() => _HeaderBarState();
 }
 
-class _HeaderBarState extends State<HeaderBar> {
+class _HeaderBarState extends State<HeaderBar> { 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final authProvider = context.read<AuthProvider>();
       final token = authProvider.token;
       if (token != null) {
@@ -28,6 +29,7 @@ class _HeaderBarState extends State<HeaderBar> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final auditoriaProvider = context.watch<AuditoriaProvider>();
     final usuario = authProvider.usuarioActual;
 
     final screenWidth = MediaQuery.of(context).size.width;
@@ -52,99 +54,142 @@ class _HeaderBarState extends State<HeaderBar> {
         ),
       );
     }
-
     final bool tieneAvatar = usuario.avatarUrl.trim().isNotEmpty;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 8 : 16,
-        vertical: 12,
-      ),
-      color: const Color(0xFFF7EFD8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Buscar...',
-                prefixIcon: const Icon(Icons.search, size: 20),
-                fillColor: const Color(0xFFF5DB90),
-                filled: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Flexible(
+    return Column(
+      children: [
+        if (auditoriaProvider.hasWsError)
+          Container(
+            width: double.infinity,
+            color: Colors.orange.shade900,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Consumer<AuditoriaProvider>(
-                  builder: (context, AuditoriaProvider, child) {
-                    return IconButton(
-                      onPressed: () {
-                        _showNotifications(context);
-                      },
-                      icon: Badge(
-                        isLabelVisible: AuditoriaProvider.cantidadSinLeer > 0,
-                        label: Text(
-                          AuditoriaProvider.cantidadSinLeer.toString(),
-                        ),
-                        child: const Icon(Icons.notifications_none),
-                      ),
-                    );
+                const Icon(
+                  Icons.shield_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Conexión en tiempo real bloqueada. Desactiva tu AdBlocker o la protección de Brave para recibir notificaciones.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.refresh,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  tooltip: 'Reintentar conexión',
+                  onPressed: () {
+                    final token = authProvider.token;
+                    if (token != null) {
+                      context.read<AuditoriaProvider>().conectar(token);
+                    }
                   },
                 ),
-                SizedBox(width: isMobile ? 0 : 10),
-                CircleAvatar(
-                  backgroundColor: Color(0xFF2E7D32),
-                  backgroundImage: tieneAvatar
-                      ? NetworkImage(usuario.avatarUrl)
-                      : null,
-                  child: !tieneAvatar
-                      ? Text(
-                          usuario.nombre.isNotEmpty
-                              ? usuario.nombre[0].toUpperCase()
-                              : 'A',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      : null,
-                ),
-                if (!isMobile) ...[
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        usuario.rol,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        usuario.nombre,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ],
             ),
           ),
-        ],
-      ),
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 8 : 16,
+            vertical: 12,
+          ),
+          color: const Color(0xFFF7EFD8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Buscar...',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    fillColor: const Color(0xFFF5DB90),
+                    filled: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Consumer<AuditoriaProvider>(
+                      builder: (context, auditoriaProvider, child) {
+                        return IconButton(
+                          onPressed: () {
+                            _showNotifications(context);
+                          },
+                          icon: Badge(
+                            isLabelVisible:
+                                auditoriaProvider.cantidadSinLeer > 0,
+                            label: Text(
+                              auditoriaProvider.cantidadSinLeer.toString(),
+                            ),
+                            child: const Icon(Icons.notifications_none),
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(width: isMobile ? 0 : 10),
+                    CircleAvatar(
+                      backgroundColor: const Color(0xFF2E7D32),
+                      backgroundImage: tieneAvatar
+                          ? NetworkImage(usuario.avatarUrl)
+                          : null,
+                      child: !tieneAvatar
+                          ? Text(
+                              usuario.nombre.isNotEmpty
+                                  ? usuario.nombre[0].toUpperCase()
+                                  : 'A',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
+                    ),
+                    if (!isMobile) ...[
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            usuario.rol,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            usuario.nombre,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -167,9 +212,7 @@ void _showNotifications(BuildContext context) {
               },
               child: Text(
                 'Marcar todas leidas',
-                style: TextStyle(
-                  fontSize: isMobile ? 10 : 12,
-                ),
+                style: TextStyle(fontSize: isMobile ? 10 : 12),
               ),
             ),
           ],
@@ -191,7 +234,19 @@ void _showNotifications(BuildContext context) {
                   final bool estaLeida = evento['leido'] ?? true;
                   final String accion = evento['accion'] ?? "";
 
-                  final String fecha = evento['fecha'] ?? "Justo ahora";
+                  //  PARSEO SEGURO DE FECHA (Evita FormatException)
+                  final dynamic rawFecha = evento['fecha'];
+                  DateTime? fechaSinformato;
+
+                  if (rawFecha is String) {
+                    fechaSinformato = DateTime.tryParse(rawFecha);
+                  } else if (rawFecha is DateTime) {
+                    fechaSinformato = rawFecha;
+                  }
+
+                  String fecha = fechaSinformato != null
+                      ? formatearHoraColombiana(fechaSinformato)
+                      : "Justo ahora";
 
                   Color colorAccion = Colors.grey;
                   IconData iconoAccion = Icons.info;
@@ -237,10 +292,8 @@ void _showNotifications(BuildContext context) {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Usuario: ${evento['usuario'] ?? 'N/A'} - Tabla: ${evento['tabla'] ?? 'N/A'}',
-                              style: TextStyle(
-                                fontSize: isMobile ? 12 : 14,
-                              ),
+                              'Usuario: ${evento['usuario'] ?? 'N/A'} | Tabla: ${evento['tabla'] ?? 'N/A'}',
+                              style: TextStyle(fontSize: isMobile ? 12 : 14),
                             ),
                             const SizedBox(height: 4),
                             Row(
@@ -276,7 +329,6 @@ void _showNotifications(BuildContext context) {
                         child: Icon(iconoAccion, color: Colors.white),
                       ),
                       onTap: () {
-                        // Al hacer clic sobre la notificación, la marcamos como leída
                         provider.marcarComoLeido(index);
                       },
                     ),
