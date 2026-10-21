@@ -18,6 +18,7 @@ import './Providers/ranking_provider.dart';
 import 'Providers/periodo_provider.dart';
 import 'Providers/session_povider.dart';
 import 'Providers/cursos_provider.dart';
+import 'Providers/historialRanking.dart';
 import 'dart:io';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -157,6 +158,12 @@ void main() async {
           create: (context) => CategoriaPuntajeProvider(),
           update: (context, authProvider, CategoriaPuntajeProvider) {
             return CategoriaPuntajeProvider!..updateToken(authProvider.token);
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, HistorialRankingProvider>(
+          create: (context) => HistorialRankingProvider(),
+          update: (context, authProvider, historialRankingProvider) {
+            return historialRankingProvider!..updateToken(authProvider.token);
           },
         ),
         ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
