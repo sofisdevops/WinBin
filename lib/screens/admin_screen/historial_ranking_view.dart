@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:winbin/models/historial_ranking.dart';
 import 'package:winbin/Providers/historialRanking.dart';
 import 'package:winbin/Providers/periodo_provider.dart';
-import 'widgets_admin/tablagenerica.dart';
+import '../admin_screen/widgets_admin/tablaGenerica.dart';
 
 class HistorialRankingView extends StatefulWidget {
   const HistorialRankingView({super.key});

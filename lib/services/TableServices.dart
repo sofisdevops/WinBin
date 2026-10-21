@@ -24,9 +24,21 @@ class Tableservices {
     if (response.statusCode == 401) {
       throw UnauthorizedException();
     }
+
     if (response.statusCode == 200) {
-      final List<dynamic> jsonList = jsonDecode(response.body);
-      //print(response.body);
+      final dynamic decodedData = jsonDecode(response.body);
+      List<dynamic> jsonList = [];
+
+      
+      if (decodedData is Map<String, dynamic> &&
+          decodedData.containsKey('content')) {
+        jsonList = decodedData['content'];
+      }
+      // O si directamente es una lista rasa
+      else if (decodedData is List) {
+        jsonList = decodedData;
+      }
+      //print(jsonList);
       return jsonList.map((item) => fromjson(item)).toList();
     } else {
       throw Exception('Error al cargar datos desde $endpoint');
@@ -51,7 +63,7 @@ class Tableservices {
       uri = uri.replace(queryParameters: stringParams);
     }
     final response = await http.get(uri, headers: headers);
-    print(response.statusCode); 
+    print(response.statusCode);
     if (response.statusCode == 401) {
       throw UnauthorizedException();
     }
@@ -159,37 +171,37 @@ class Tableservices {
     }
     return response.statusCode == 200;
   }
+
   Future<bool> actualizarPatch(
     String endponit,
     dynamic id,
     String? token,
-    dynamic data) async {
-  final url = Uri.parse('$baseUrl/$endponit/$id'); 
+    dynamic data,
+  ) async {
+    final url = Uri.parse('$baseUrl/$endponit/$id');
 
-  try {
-    final bodyData = jsonEncode(data);
+    try {
+      final bodyData = jsonEncode(data);
 
-    final response = await http.patch(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-         if (token != null) 'Authorization': 'Bearer $token',
-        
-      },
-      body: bodyData,
-    );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: bodyData,
+      );
 
-    if (response.statusCode == 200 || response.statusCode == 204) {
-      print('Actualización exitosa');
-      return true;
-    } else {
-      print('Error en la API (${response.statusCode}): ${response.body}');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('Actualización exitosa');
+        return true;
+      } else {
+        print('Error en la API (${response.statusCode}): ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error al conectar con el servidor: $e');
       return false;
     }
-  } catch (e) {
-    print('Error al conectar con el servidor: $e');
-    return false;
   }
-}
-
 }
