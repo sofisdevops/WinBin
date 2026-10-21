@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:winbin/Providers/categoriaPuntaje_provider.dart';
+import 'package:winbin/Providers/registroIA_provider.dart';
 import 'package:winbin/screens/ranking_screen/ranking_screen.dart';
 import 'screens/admin_screen/main_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -169,6 +170,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
         ChangeNotifierProvider(create: (_) => DashboardProvider()),
         ChangeNotifierProvider(create: (_) => RankingProvider()),
+        ChangeNotifierProvider(create: (_)=> RegistroiaProvider()),
+        
+
       ],
       child: MiAppWeb(router: router),
     ),

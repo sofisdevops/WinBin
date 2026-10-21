@@ -13,6 +13,7 @@ import 'package:winbin/screens/admin_screen/gestion_auditoria_view.dart';
 import 'package:winbin/screens/admin_screen/gestion_sessione_view.dart';
 import 'package:winbin/screens/admin_screen/gestion_cursoso_view.dart';
 import 'package:winbin/screens/admin_screen/historial_ranking_view.dart';
+import '../admin_screen/gestion_registroIA.dart';
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -34,6 +35,7 @@ class _MainLayoutState extends State<MainLayout> {
     GestionSessionView(),
     GestionCursoView(),
     HistorialRankingView(),
+    GestionRegistroia()
   ];
 
   Future<void> _cerrarSesion() async {
@@ -152,6 +154,7 @@ class _MainLayoutState extends State<MainLayout> {
                 _buildNavItem(context, isMobile, 7, Icons.person_outline, 'Gestión de Sesiones'),
                 _buildNavItem(context, isMobile, 8, Icons.school, 'Gestión de Cursos'),
                 _buildNavItem(context, isMobile, 9, Icons.emoji_events, 'Historial de Ranking'),
+                 _buildNavItem(context, isMobile, 10, Icons.reddit_outlined, 'Gestión de Registro IA')
               ],
             ),
           ),

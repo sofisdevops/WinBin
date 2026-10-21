@@ -1,71 +1,112 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/main.dart';
+import 'package:winbin/models/registroIA_model.dart';
 import 'package:winbin/models/users_model.dart';
 import 'package:winbin/services/TableServices.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:winbin/utils/api_exceptions.dart';
 
-class RegistroiaProvider extends ChangeNotifier{
+class RegistroiaProvider extends ChangeNotifier {
   final Tableservices _tableServices = Tableservices();
 
-  List<Usuario> _todosLosUsuarios = [];
-  List<Usuario> get todosLosEstudiantes => _todosLosUsuarios;
+  List<RegistroiaModel> _todosLosRegistros = [];
+  List<RegistroiaModel> get todosLosRegistris => _todosLosRegistros;
 
-  List<Usuario> _estudiantesEncontrados = [];
-  List<Usuario> get estudiantesEncontrados => _estudiantesEncontrados;
+  List<RegistroiaModel> _registrosEncontrados = [];
+  List<RegistroiaModel> get registrosEncontrados => _registrosEncontrados;
 
   bool _cargando = false;
   bool get cargando => _cargando;
 
   // cajas de texto para ingresar los datos de busqueda
-  final TextEditingController idController = TextEditingController();
-  final TextEditingController nombreController = TextEditingController();
-  final TextEditingController cursoController = TextEditingController();
+  final TextEditingController NombreMaterialController =
+      TextEditingController();
+  //final TextEditingController fechaController = TextEditingController();
+  final TextEditingController confianzaController = TextEditingController();
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
+  DateTime? _seletedFecha;
+  DateTime? get seletedFecha => _seletedFecha;
+
+  set seletedFecha(DateTime? fecha) {
+    _seletedFecha = fecha;
+  }
 
   // funcion para consultar estudiantes en la base de datos
-  Future<void> buscarEstudiantes(String? token) async {
+  Future<void> fetchUsuarios(String? token) async {
+    _cargando = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _todosLosRegistros = await _tableServices.traerDatos<RegistroiaModel>(
+        endpoint: 'registroia',
+        fromjson: (json) => RegistroiaModel.fromJson(json),
+        token: token,
+      );
+    } on UnauthorizedException {
+      rethrow;
+    } catch (e) {
+      if (e is UnauthorizedException) {
+        print('Sesión expirada detectada en UsuarioProvider');
+        _forzarCierreDeSesion();
+      } else {
+        print('Error al buscar estudiantes: $e');
+        _todosLosRegistros = [];
+      }
+      _errorMessage = e.toString();
+    } finally {
+      _cargando = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> buscarRegistro(String? token) async {
     _cargando = true;
     notifyListeners();
 
     try {
-      // ruta para consultar la lista completa
-      String endpoint = 'usuarios';
-
       // Trae todos los datos y los asigna a la propiedad global
-      _todosLosUsuarios = await _tableServices.traerDatos<Usuario>(
-        endpoint: endpoint,
-        fromjson: (json) => Usuario.fromJson(json),
+      _todosLosRegistros = await _tableServices.traerDatos<RegistroiaModel>(
+        endpoint: 'registroia',
+        fromjson: (json) => RegistroiaModel.fromJson(json),
         token: token,
       );
 
       // limpia espacios y pasa a minusculas los textos ingresados
-      final textoId = idController.text.trim().toLowerCase();
-      final textoNombre = nombreController.text.trim().toLowerCase();
-      final textoCurso = cursoController.text.trim().toLowerCase();
+      final NombreMaterial = NombreMaterialController.text.trim().toLowerCase();
+      
+      final confianza = confianzaController.text.trim().toLowerCase();
 
       // filtra la lista segun la identificacion o el nombre ingresado
-      _estudiantesEncontrados = _todosLosUsuarios.where((estudiante) {
+      _registrosEncontrados = _todosLosRegistros.where((registro) {
         // revisa si el documento coincide o si el campo esta vacio
-        bool coincideId =
-            textoId.isEmpty ||
-            (estudiante.documento != null &&
-                estudiante.documento!.toLowerCase().contains(textoId));
+        bool coincideMaterial =
+            NombreMaterial.isEmpty ||
+            (registro.material?.nombreMaterial != null &&
+                registro.material!.nombreMaterial.toLowerCase().contains(
+                  NombreMaterial,
+                ));
 
-        // revisa si el nombre coincide o si el campo esta vacio
-        bool coincideNombre =
-            textoNombre.isEmpty ||
-            (estudiante.nombre != null &&
-                estudiante.nombre!.toLowerCase().contains(textoNombre));
+         bool coincideFecha = _seletedFecha == null;
+        if (_seletedFecha != null && registro.session?.fechaHora != null) {
+          DateTime fechaReg = registro.session!.fechaHora!;
+          coincideFecha = fechaReg.year == _seletedFecha!.year &&
+              fechaReg.month == _seletedFecha!.month &&
+              fechaReg.day == _seletedFecha!.day;
+        }
 
-        // revisa si el curso coincide o si el campo esta vacio
-        bool coincideCurso =
-            textoCurso.isEmpty ||
-            (estudiante.curso?.nombre != null &&
-                estudiante.curso!.nombre!.toLowerCase().contains(textoCurso));
+        bool coincideConfianza =
+            confianza.isEmpty ||
+            (registro.confianza != null &&
+                registro.confianza.toString().toLowerCase().contains(
+                  confianza,
+                ));
 
         // conserva a la estudiante si cumple con ambas reglas
-        return coincideId && coincideNombre && coincideCurso;
+        return coincideMaterial && coincideFecha && coincideConfianza;
       }).toList();
     } catch (e) {
       if (e is UnauthorizedException) {
@@ -73,10 +114,10 @@ class RegistroiaProvider extends ChangeNotifier{
         _forzarCierreDeSesion();
       } else {
         print('Error al buscar estudiantes: $e');
-        _estudiantesEncontrados = [];
+        _registrosEncontrados = [];
       }
       print('Error al buscar estudiantes: $e');
-      _estudiantesEncontrados = [];
+      _registrosEncontrados = [];
     }
 
     _cargando = false;
@@ -84,11 +125,11 @@ class RegistroiaProvider extends ChangeNotifier{
   }
 
   // vacia las cajas de texto y reinicia los resultados
-  void limpiarBusqueda() {
-    idController.clear();
-    nombreController.clear();
-    cursoController.clear();
-    _estudiantesEncontrados = [];
+  Future<void> limpiarBusqueda() async{
+    NombreMaterialController.clear();
+    _seletedFecha = null;
+    confianzaController.clear();
+    _registrosEncontrados = [];
     notifyListeners();
   }
 
