@@ -3,7 +3,6 @@ import 'package:winbin/screens/admin_screen/gestion_puntos_view.dart';
 import 'package:winbin/screens/admin_screen/gestion_usuarios_view.dart';
 import 'configuracion_reglas_view.dart';
 import 'periodos_view.dart';
-import 'ranking_filtros_view.dart';
 import 'widgets_admin/header_bar.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +13,7 @@ import 'package:winbin/screens/admin_screen/gestion_sessione_view.dart';
 import 'package:winbin/screens/admin_screen/gestion_cursoso_view.dart';
 import 'package:winbin/screens/admin_screen/historial_ranking_view.dart';
 import '../admin_screen/gestion_registroIA.dart';
+
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -27,15 +27,14 @@ class _MainLayoutState extends State<MainLayout> {
   final List<Widget> _views = const [
     DashboardContent(),
     GestionAuditoriaView(),
-    GestionPuntosView(),
     ConfiguracionReglasView(),
     PeriodosView(),
-    RankingView(),
+    HistorialRankingView(),
     GestionUsuariosView(),
     GestionSessionView(),
     GestionCursoView(),
-    HistorialRankingView(),
-    GestionRegistroia()
+
+    GestionRegistroia(),
   ];
 
   Future<void> _cerrarSesion() async {
@@ -45,9 +44,9 @@ class _MainLayoutState extends State<MainLayout> {
       context.go('/login');
     }
   }
-   Future<void> _home() async {
-      context.go('/ranking');
- 
+
+  Future<void> _home() async {
+    context.go('/ranking');
   }
 
   @override
@@ -59,7 +58,7 @@ class _MainLayoutState extends State<MainLayout> {
       body: Row(
         children: [
           if (!isMobile) _buildSidebar(context, isMobile),
-          
+
           Expanded(
             child: Column(
               children: [
@@ -71,7 +70,10 @@ class _MainLayoutState extends State<MainLayout> {
                         Builder(
                           builder: (ctx) => IconButton(
                             padding: const EdgeInsets.only(left: 16),
-                            icon: const Icon(Icons.menu, color: Color(0xFF2E7D32)),
+                            icon: const Icon(
+                              Icons.menu,
+                              color: Color(0xFF2E7D32),
+                            ),
                             onPressed: () => Scaffold.of(ctx).openDrawer(),
                           ),
                         ),
@@ -81,7 +83,7 @@ class _MainLayoutState extends State<MainLayout> {
                   )
                 else
                   const HeaderBar(),
-                  
+
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
@@ -96,7 +98,6 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-  
   Widget _buildSidebar(BuildContext context, bool isMobile) {
     return Container(
       width: 250,
@@ -108,15 +109,14 @@ class _MainLayoutState extends State<MainLayout> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.recycling,
-                  color: Color(0xFF2E7D32),
-                  size: 28,
+                child: Image.asset(
+                  'lib/assets/images/logo.png',
+                  width: 50,
+                  height: 50,
                 ),
               ),
               const SizedBox(width: 10),
@@ -144,17 +144,70 @@ class _MainLayoutState extends State<MainLayout> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                _buildNavItem(context, isMobile, 0, Icons.dashboard, 'Panel de Control'),
-                _buildNavItem(context, isMobile, 1, Icons.library_books, 'Auditoria'),
-                _buildNavItem(context, isMobile, 2, Icons.stars, 'Gestión de Puntos'),
-                _buildNavItem(context, isMobile, 3, Icons.rule, 'Configuración de Reglas'),
-                _buildNavItem(context, isMobile, 4, Icons.calendar_today, 'Periodos'),
-                _buildNavItem(context, isMobile, 5, Icons.bar_chart, 'Ranking'),
-                _buildNavItem(context, isMobile, 6, Icons.people, 'Gestión de Usuarios'),
-                _buildNavItem(context, isMobile, 7, Icons.person_outline, 'Gestión de Sesiones'),
-                _buildNavItem(context, isMobile, 8, Icons.school, 'Gestión de Cursos'),
-                _buildNavItem(context, isMobile, 9, Icons.emoji_events, 'Historial de Ranking'),
-                 _buildNavItem(context, isMobile, 10, Icons.reddit_outlined, 'Gestión de Registro IA')
+                _buildNavItem(
+                  context,
+                  isMobile,
+                  0,
+                  Icons.dashboard,
+                  'Panel de Control',
+                ),
+                _buildNavItem(
+                  context,
+                  isMobile,
+                  1,
+                  Icons.library_books,
+                  'Auditoria',
+                ),
+                _buildNavItem(
+                  context,
+                  isMobile,
+                  2,
+                  Icons.rule,
+                  'Configuración de Reglas',
+                ),
+                _buildNavItem(
+                  context,
+                  isMobile,
+                  3,
+                  Icons.calendar_today,
+                  'Periodos',
+                ),
+                _buildNavItem(
+                  context,
+                  isMobile,
+                  4,
+                  Icons.emoji_events,
+                  'Historial de Ranking',
+                ),
+                _buildNavItem(
+                  context,
+                  isMobile,
+                  5,
+                  Icons.people,
+                  'Gestión de Usuarios',
+                ),
+                _buildNavItem(
+                  context,
+                  isMobile,
+                  6,
+                  Icons.person_outline,
+                  'Gestión de Sesiones',
+                ),
+                _buildNavItem(
+                  context,
+                  isMobile,
+                  7,
+                  Icons.school,
+                  'Gestión de Cursos',
+                ),
+
+                _buildNavItem(
+                  context,
+                  isMobile,
+                  8,
+                  Icons.reddit_outlined,
+                  'Gestión de Registro IA',
+                ),
               ],
             ),
           ),
@@ -168,7 +221,6 @@ class _MainLayoutState extends State<MainLayout> {
             isAction: true,
             onTapCallback: () {
               _home();
-             
             },
           ),
           _buildNavItem(
@@ -182,7 +234,7 @@ class _MainLayoutState extends State<MainLayout> {
               _cerrarSesion();
             },
           ),
-          
+
           const SizedBox(height: 20),
         ],
       ),

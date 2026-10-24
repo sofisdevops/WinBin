@@ -11,7 +11,7 @@ class HeaderBar extends StatefulWidget {
   State<HeaderBar> createState() => _HeaderBarState();
 }
 
-class _HeaderBarState extends State<HeaderBar> { 
+class _HeaderBarState extends State<HeaderBar> {
   @override
   void initState() {
     super.initState();
@@ -106,21 +106,6 @@ class _HeaderBarState extends State<HeaderBar> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Buscar...',
-                    prefixIcon: const Icon(Icons.search, size: 20),
-                    fillColor: const Color(0xFFF5DB90),
-                    filled: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
               const SizedBox(width: 8),
               Flexible(
                 child: Row(

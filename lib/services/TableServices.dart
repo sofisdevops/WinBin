@@ -29,7 +29,6 @@ class Tableservices {
       final dynamic decodedData = jsonDecode(response.body);
       List<dynamic> jsonList = [];
 
-      
       if (decodedData is Map<String, dynamic> &&
           decodedData.containsKey('content')) {
         jsonList = decodedData['content'];
@@ -72,6 +71,36 @@ class Tableservices {
       return fromjson(jsonMap);
     } else {
       throw Exception('Error al cargar datos desde $endpoint');
+    }
+  }
+
+  Future<List<T>> traerListaConParametros<T>({
+    required String endpoint,
+    required T Function(dynamic json) fromjson,
+    required String? token,
+    Map<String, dynamic>? queryParams,
+  }) async {
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+    Uri uri = Uri.parse('$baseUrl/$endpoint');
+    if (queryParams != null && queryParams.isNotEmpty) {
+      final Map<String, String> stringParams = queryParams.map(
+        (key, value) => MapEntry(key, value.toString()),
+      );
+      uri = uri.replace(queryParameters: stringParams);
+    }
+    final response = await http.get(uri, headers: headers);
+    print(response.statusCode);
+    if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    }
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((item) => fromjson(item)).toList();
+    } else {
+      throw Exception('Error al cargar lista desde $endpoint');
     }
   }
 

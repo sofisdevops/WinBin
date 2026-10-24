@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:winbin/models/auth_model.dart';
 import 'package:winbin/models/ranking_model.dart';
-import 'package:winbin/models/perido_model.dart';
 
 class HistorialRanking {
   final int id_historial;
@@ -9,9 +8,9 @@ class HistorialRanking {
   final String tipoPremio;
   final int puntosLogrados;
   final DateTime fecha;
-  final int documento;
-  final dynamic id_curso;
-  final dynamic id_periodo;
+  final UsuarioPerfil? documento;
+  final Curso? id_curso;
+  final Periodo? id_periodo;
 
   HistorialRanking({
     required this.id_historial,
@@ -26,14 +25,28 @@ class HistorialRanking {
 
   factory HistorialRanking.fromJson(Map<String, dynamic> json) {
     return HistorialRanking(
-      id_historial: json['id_historial'] ?? 0,
-      puesto: json['puesto'] ?? 0,
-      tipoPremio: json['tipoPremio'] ?? '',
-      puntosLogrados: json['puntosLogrados'] ?? 0,
-      fecha: json['fecha'] != null ? DateTime.tryParse(json['fecha'].toString()) ?? DateTime.now() : DateTime.now(),
-      documento: json['documento'] ?? 0,
-      id_curso: json['id_curso'] ?? 0,
-      id_periodo: json['id_periodo'] ?? 0,
+      id_historial: json['id_historial'] is int
+          ? json['id_historial']
+          : int.tryParse(json['id_historial']?.toString() ?? '0') ?? 0,
+      puesto: json['puesto'] is int
+          ? json['puesto']
+          : int.tryParse(json['puesto']?.toString() ?? '0') ?? 0,
+      tipoPremio: json['tipoPremio']?.toString() ?? '',
+      puntosLogrados: json['puntosLogrados'] is int
+          ? json['puntosLogrados']
+          : int.tryParse(json['puntosLogrados']?.toString() ?? '0') ?? 0,
+      fecha: json['fecha'] != null
+          ? DateTime.tryParse(json['fecha'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      documento: json['documento'] is Map<String, dynamic>
+          ? UsuarioPerfil.fromJson(json['documento'])
+          : null,
+      id_curso: json['id_curso'] is Map<String, dynamic>
+          ? Curso.fromJson(json['id_curso'])
+          : null,
+      id_periodo: json['id_periodo'] is Map<String, dynamic>
+          ? Periodo.fromJson(json['id_periodo'])
+          : null,
     );
   }
 
@@ -44,8 +57,8 @@ class HistorialRanking {
       'tipoPremio': tipoPremio,
       'puntosLogrados': puntosLogrados,
       'fecha': fecha.toIso8601String().split('T').first,
-      'documento': documento,
-      'id_curso': id_curso,
+      'documento': documento?.toJson(),
+      'id_curso': id_curso?.toJson(),
       'id_periodo': id_periodo,
     };
   }
@@ -55,9 +68,9 @@ class HistorialRanking {
     String? tipoPremio,
     int? puntosLogrados,
     DateTime? fecha,
-    int? documento,
-    dynamic id_curso,
-    dynamic id_periodo,
+    UsuarioPerfil? documento,
+    Curso? id_curso,
+    Periodo? id_periodo,
   }) {
     return HistorialRanking(
       id_historial: id_historial,
