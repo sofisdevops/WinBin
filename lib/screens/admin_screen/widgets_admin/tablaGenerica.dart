@@ -81,7 +81,6 @@ class Tablagenerica<T> extends DataTableSource {
                   onPressed: () => cambiarRol!(item),
                 ),
 
-              // 3. Botón Eliminar Definitivamente (Trash/Delete)
               if (onDelete != null)
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -94,7 +93,6 @@ class Tablagenerica<T> extends DataTableSource {
       );
     }
 
-    // para los colores intercalados
     final esPar = index % 2 == 0;
     final colorFondo = esPar
         ? const Color(0xFFF4F4F3)
@@ -147,8 +145,11 @@ class GenericTable<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasActions = onEdit != null || onDelete != null;
-
     final allColumns = [...columns, if (hasActions) 'Acciones'];
+
+    final int effectiveRowsPerPage = data.isEmpty
+        ? 1
+        : (data.length < rowsPerPage ? data.length : rowsPerPage);
 
     final source = Tablagenerica<T>(
       data: data,
@@ -179,10 +180,9 @@ class GenericTable<T> extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: SizedBox(
               width: tableWidth,
-              height: 650,
               child: PaginatedDataTable(
                 header: Text(title),
-                rowsPerPage: rowsPerPage,
+                rowsPerPage: effectiveRowsPerPage,
                 headingRowColor: WidgetStateProperty.all(
                   const Color(0xFFD06E4B),
                 ),

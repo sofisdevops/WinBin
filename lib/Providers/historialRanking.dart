@@ -23,18 +23,20 @@ class HistorialRankingProvider extends ChangeNotifier {
     _token = token;
   }
 
-  Future<void> fetchHistoriales() async {
+  Future<void> fetchHistoriales(String idPeriodo) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     try {
-      _historiales = await _apiService.traerDatos<HistorialRanking>(
-        endpoint: 'HistorialRanking',
+      final List<HistorialRanking> historiales = await _apiService.traerListaConParametros<HistorialRanking>(
+        endpoint: 'HistorialGanadores',
         fromjson: (json) => HistorialRanking.fromJson(json),
         token: _token,
+        queryParams: {'idPeriodo': idPeriodo}
       );
 
-      _historiales.sort((a, b) => b.fecha.compareTo(a.fecha));
+      _historiales = historiales;
+
     } on UnauthorizedException {
       rethrow;
     } catch (e) {
