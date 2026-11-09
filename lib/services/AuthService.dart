@@ -4,6 +4,7 @@ import 'package:winbin/models/auth_model.dart';
 import 'package:winbin/models/session_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:winbin/utils/api_exceptions.dart';
+import 'package:flutter/foundation.dart';
 
 
 class AuthService {
@@ -24,15 +25,14 @@ class AuthService {
       }
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        print('Login exitoso');
         return LoginResponse.fromJson(data);
       } else {
-        print('Error al iniciar sesión: ${response.statusCode}');
+        if (kDebugMode) print('Error al iniciar sesión: ${response.statusCode}');
         return null;
       }
     } catch (e) {
       if(e is UnauthorizedException) rethrow;
-      print('Error al iniciar sesión: $e');
+      if (kDebugMode) print('Error al iniciar sesión: $e');
       return null;
     }
   }
@@ -63,15 +63,14 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        print('Detalle de sesión creado/obtenido con éxito: ${response.statusCode}');
         return DetalleSessionResponse.fromJson(data);
       } else {
-        print('Error al obtener detalles del usuario: ${response.statusCode}');
+        if (kDebugMode) print('Error al obtener detalles del usuario: ${response.statusCode}');
         return null;
       }
     } catch (e) {
       if(e is UnauthorizedException) rethrow;
-      print('Error al obtener detalles del usuario: $e');
+       if (kDebugMode) print('Error al obtener detalles del usuario: $e');
       return null;
     }
   }
@@ -87,15 +86,14 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
-        print('cursos obtenidos : ${response.statusCode}');
         return jsonList.map((json) => Curso.fromJson(json)).toList();
       } else {
-        print('Error al obtener cursos: ${response.statusCode}');
+        if (kDebugMode) print('Error al obtener cursos: ${response.statusCode}');
         return null;
       }
     } catch (e) {
       if(e is UnauthorizedException) rethrow;
-      print('Excepción al obtener cursos: $e');
+      if (kDebugMode) print('Excepción al obtener cursos: $e');
       return null;
     }
   }
@@ -118,15 +116,14 @@ class AuthService {
       }
 
       if (response.statusCode == 200) {
-        print('perfiles obtenidos :${response.statusCode}');
         return UsuarioPerfil.fromJson(jsonDecode(response.body));
       } else {
-        print('Error al obtener perfil: ${response.statusCode}');
+        if (kDebugMode)print('Error al obtener perfil: ${response.statusCode}');
         return null;
       }
     } catch (e) {
       if(e is UnauthorizedException) rethrow;
-      print('Excepción al obtener perfil: $e');
+      if (kDebugMode) print('Excepción al obtener perfil: $e');
       return null;
     }
   }
@@ -149,15 +146,14 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Periodo obtenido : ${response.statusCode}');
         return Periodo.fromJson(data);
       } else {
-        print('Error al obtener periodo: ${response.statusCode}');
+        if (kDebugMode) print('Error al obtener periodo: ${response.statusCode}');
         return null;
       }
     } catch (e) {
       if(e is UnauthorizedException) rethrow;
-      print('Excepción al obtener periodo: $e');
+      if (kDebugMode) print('Excepción al obtener periodo: $e');
       return null;
     }
   }
@@ -187,15 +183,14 @@ class AuthService {
           throw UnauthorizedException();
       }
       if (response.statusCode == 201 || response.statusCode == 200) {
-        print('Usuario registrado con éxito');
         return true;
       } else {
-        print('Error en registro: ${response.statusCode}');
+        if (kDebugMode)print('Error en registro: ${response.statusCode}');
         return false;
       }
     } catch (e) {
       if(e is UnauthorizedException) rethrow;
-      print('Excepción al conectar con el servidor: $e');
+      if (kDebugMode) print('Excepción al conectar con el servidor: $e');
       return false;
     }
   }

@@ -8,6 +8,7 @@ import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/main.dart';
 import '../models/ranking_model.dart';
+import 'package:flutter/foundation.dart';
 
 class RankingProvider with ChangeNotifier {
 
@@ -109,14 +110,14 @@ class RankingProvider with ChangeNotifier {
           _currentPage++; 
         }
       } else {
-        print('Error en la API de estudiantes: ${response.statusCode}');
+       if (kDebugMode) print('Error en la API de estudiantes: ${response.statusCode}');
       }
     } catch (e) {
       if (e is UnauthorizedException) {
         debugPrint(e.mensaje); 
         _forzarCierreDeSesion();
       } else {
-        debugPrint('Error de red o parsing (Estudiantes): $e');
+        if (kDebugMode)debugPrint('Error de red o parsing (Estudiantes): $e');
       }
     } finally {
       _isLoading = false;
@@ -161,14 +162,14 @@ class RankingProvider with ChangeNotifier {
           _currentPageCursos++; 
         }
       } else {
-        print('Error en la API de cursos: ${response.statusCode}');
+        if (kDebugMode)print('Error en la API de cursos: ${response.statusCode}');
       }
     } catch (e) {
       if (e is UnauthorizedException) {
         debugPrint(e.mensaje); 
         _forzarCierreDeSesion();
       } else {
-        debugPrint('Error de red o parsing (Cursos): $e');
+        if (kDebugMode)debugPrint('Error de red o parsing (Cursos): $e');
       }
     } finally {
       _isLoadingCursos = false;
@@ -216,7 +217,7 @@ class RankingProvider with ChangeNotifier {
         debugPrint(e.mensaje); 
         _forzarCierreDeSesion();
       } else {
-        debugPrint('Error cargando rankings iniciales: $e');
+        if (kDebugMode)debugPrint('Error cargando rankings iniciales: $e');
       }
     }
   }
@@ -237,7 +238,6 @@ class RankingProvider with ChangeNotifier {
         onConnect: (StompFrame frame) {
           _isConnected = true;
           _hasWsError = false;
-          print("¡CONEXIÓN WS LISTA EN PROVIDER TOP 10!");
           _safeNotifyListeners();
           
           _stompClient?.subscribe(
@@ -248,7 +248,7 @@ class RankingProvider with ChangeNotifier {
                   _topEstudiantes = json.decode(frame.body!);
                   _safeNotifyListeners(); 
                 } catch (e) {
-                  print(" ERROR PARSEANDO LISTA ESTUDIANTES WS: $e");
+                 if (kDebugMode) print(" ERROR PARSEANDO LISTA ESTUDIANTES WS: $e");
                 }
               }
             },
@@ -262,7 +262,7 @@ class RankingProvider with ChangeNotifier {
                   _topCursos = json.decode(frame.body!);
                   _safeNotifyListeners();
                 } catch (e) {
-                  print(" ERROR PARSEANDO LISTA CURSOS WS: $e");
+                  if (kDebugMode)print(" ERROR PARSEANDO LISTA CURSOS WS: $e");
                 }
               }
             },

@@ -29,9 +29,7 @@ Future<pw.Document> generarReporteWinbin(
   try {
     final logoBytes = await rootBundle.load('lib/assets/images/logo.png');
     logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
-  } catch (e) {
-    print("Nota: No se pudo cargar el logo. Verifica el pubspec.yaml. Error: $e");
-   
+  } catch (e) {   
   }
 
  
@@ -137,7 +135,7 @@ Future<pw.Document> generarReporteWinbin(
                 pw.SizedBox(height: 8),
                 _crearFilaDestacada('Usuario con más sesiones:', data['topSesiones'] ?? 'No disponible'),
                 pw.SizedBox(height: 8),
-                _crearFilaDestacada('Usuario con más registros de IA:', data['topRegistrosIA'] ?? 'No disponible'),
+                _crearFilaDestacada('Materiales más registrados:', data['topRegistrosIA'] ?? 'No disponible'),
               ]
             ),
           ),

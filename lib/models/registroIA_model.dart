@@ -1,10 +1,11 @@
 import 'material_model.dart';
 import 'package:winbin/models/puntajeCtaegoria_model.dart';
 import 'package:winbin/models/session_model.dart';
+import 'package:flutter/foundation.dart';
 
 class RegistroiaModel {
   final int? idIa;
-  final int? confianza;
+  final double? confianza;
   final String? utlImagen;
   final DetalleSessionResponse? session;
   final PuntajeCategoria? categoria;
@@ -23,9 +24,8 @@ class RegistroiaModel {
     try {
       return RegistroiaModel(
         idIa: json['idIa'] ?? json['id_ia'],
-        confianza: json['confianza'] != null ? json['confianza'] : null,
-        utlImagen: json['utlImagen'] != null ? json['utlImagen'] : null,
-
+        confianza: (json['confianza'] as num?)?.toDouble(),
+        utlImagen: json['utlImagen'] as String?,
 
         session: json['session'] != null
             ? DetalleSessionResponse.fromJson(
@@ -42,8 +42,9 @@ class RegistroiaModel {
             : null,
       );
     } catch (e, stackTrace) {
-      print("❌ ERROR PARSEANDO RegistroiaModel en el JSON: $json");
-      print("Detalle del error: $e");
+     
+       if (kDebugMode) print("ERROR PARSEANDO RegistroiaModel: $e");
+      
       rethrow;
     }
   }

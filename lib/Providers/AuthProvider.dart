@@ -7,6 +7,7 @@ import 'package:winbin/utils/api_exceptions.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:winbin/services/UsuarioService.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -116,7 +117,7 @@ class AuthProvider extends ChangeNotifier {
       _setCargando(false);
       return false;
     } catch (e) {
-      print("Error en el login: $e");
+      if (kDebugMode)print("Error en el login: $e");
       _setCargando(false);
       return false;
     }
@@ -126,7 +127,7 @@ class AuthProvider extends ChangeNotifier {
     String? tokenActual = await obtenerToken();
 
     if (tokenActual == null) {
-      print("No hay token disponible para recargar el perfil.");
+     if (kDebugMode) print("No hay token disponible para recargar el perfil.");
       return;
     }
 
@@ -137,12 +138,12 @@ class AuthProvider extends ChangeNotifier {
         _usuarioActual = perfil;
         notifyListeners();
       } else {
-        print("No se pudo obtener el perfil desde AuthService.");
+        if (kDebugMode) print("No se pudo obtener el perfil desde AuthService.");
       }
     } on UnauthorizedException {
       await logout();
     } catch (e) {
-      print("Error al recargar el perfil del usuario: $e");
+      if (kDebugMode) print("Error al recargar el perfil del usuario: $e");
     }
   }
 
@@ -179,7 +180,7 @@ class AuthProvider extends ChangeNotifier {
     String? tokenActual = await obtenerToken();
 
     if (tokenActual == null) {
-      print("No hay token para consultar el período");
+      if (kDebugMode)print("No hay token para consultar el período");
       return null;
     }
 
@@ -193,7 +194,7 @@ class AuthProvider extends ChangeNotifier {
       await logout();
       return null;
     } catch (e) {
-      print("Error al recargar el perfil del usuario: $e");
+      if (kDebugMode)print("Error al recargar el perfil del usuario: $e");
       return null;
     }
   }
@@ -209,7 +210,7 @@ class AuthProvider extends ChangeNotifier {
 
     if (_token != null) {
       if (JwtDecoder.isExpired(_token!)) {
-        print("El token ya expiró localmente. No consultamos al backend.");
+        if (kDebugMode)print("El token ya expiró localmente. No consultamos al backend.");
         await logout();
         return;
       }
@@ -231,8 +232,6 @@ class AuthProvider extends ChangeNotifier {
     _token = null;
     _nombrePeriodo = null;
     _usuarioActual = null;
-
-    print("El usuario ha cerrado sesión");
 
     notifyListeners();
   }

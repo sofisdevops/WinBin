@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:winbin/models/puntajeCtaegoria_model.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:winbin/Providers/UsuarioProvider.dart';
+import 'package:flutter/foundation.dart';
 
 class CategoriaPuntajeProvider extends ChangeNotifier {
   final Tableservices _apiService = Tableservices();
@@ -47,7 +48,7 @@ class CategoriaPuntajeProvider extends ChangeNotifier {
         print('Sesión expirada detectada en CategoriaPuntajeProvider');
         UsuarioProvider().forzarCierreDeSesion();
       } else {
-        print('Error al buscar categorias de puntaje: $e');
+        if (kDebugMode) print('Error al buscar categorias de puntaje: $e');
         _puntajeCategorias = [];
       }
       _errorMessage = e.toString();

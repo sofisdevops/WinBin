@@ -69,9 +69,6 @@ class _PeriodosViewState extends State<PeriodosView> {
   }
 
   void _crearNuevoPeriodo() async {
-    print('nombre: ${_nombreCtrl.text}');
-    print('inicio: ${_fechaInicioCtrl.text}');
-    print('fin: ${_fechaFinCtrl.text}');
     if (_nombreCtrl.text.isEmpty ||
         _fechaInicioCtrl.text.isEmpty ||
         _fechaFinCtrl.text.isEmpty) {

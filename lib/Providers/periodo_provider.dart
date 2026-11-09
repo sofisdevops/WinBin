@@ -5,6 +5,7 @@ import 'package:winbin/main.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/models/perido_model.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:flutter/foundation.dart';
 
 class PeriodoProvider extends ChangeNotifier {
   final Tableservices _apiService = Tableservices();
@@ -48,7 +49,7 @@ class PeriodoProvider extends ChangeNotifier {
         print('Sesión expirada detectada en UsuarioProvider');
         _forzarCierreDeSesion();
       } else {
-        print('Error al buscar periodos: $e');
+        if (kDebugMode)print('Error al buscar periodos: $e');
         _periodos = [];
       }
       _errorMessage = e.toString();
@@ -76,7 +77,7 @@ class PeriodoProvider extends ChangeNotifier {
         print('Sesión expirada detectada en UsuarioProvider');
         _forzarCierreDeSesion();
       } else {
-        print('Error al actualizar periodo: $e');
+        if (kDebugMode)print('Error al actualizar periodo: $e');
         _periodos = [];
       }
       return false;
@@ -102,7 +103,7 @@ class PeriodoProvider extends ChangeNotifier {
         print('Sesión expirada detectada en UsuarioProvider');
         _forzarCierreDeSesion();
       } else {
-        print('Error al crear periodo: $e');
+        if (kDebugMode)print('Error al crear periodo: $e');
       }
       return false;
     }

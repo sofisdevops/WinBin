@@ -39,8 +39,6 @@ class SessionProvider extends ChangeNotifier {
         topUser = user;
       }
     });
-    print(topUser);
-    print(maxSesiones);
 
     return '$topUser  ($maxSesiones sesiones)';
   }

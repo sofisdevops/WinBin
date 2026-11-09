@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:winbin/utils/api_exceptions.dart';
+import 'package:flutter/foundation.dart';
 
 class DashboardProvider extends ChangeNotifier {
   bool isLoading = true;
@@ -54,18 +55,17 @@ class DashboardProvider extends ChangeNotifier {
 
         _procesarGraficoSesiones(data['sesionesPorDia'] ?? []);
         _procesarGraficoReciclaje(data['reciclajePorDia'] ?? []);
-        print('Datos cargados correctamente');
       } else {
-        debugPrint('Error al cargar dashboard: ${response.statusCode} ${response.body}');
+        if (kDebugMode)debugPrint('Error al cargar dashboard: ${response.statusCode}');
       }
     } catch (e) {
       if (e is UnauthorizedException) {
         debugPrint(e.mensaje); 
         _forzarCierreDeSesion();
       } else {
-        debugPrint('Error de red o parsing: $e');
+        if (kDebugMode)debugPrint('Error de red o parsing: $e');
       }
-      debugPrint('Error al cargar dashboard: $e');
+      if (kDebugMode)debugPrint('Error al cargar dashboard: $e');
     } finally {
       isLoading = false;
       notifyListeners();

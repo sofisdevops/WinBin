@@ -21,6 +21,7 @@ import 'Providers/session_povider.dart';
 import 'Providers/cursos_provider.dart';
 import 'Providers/historialRanking.dart';
 import 'dart:io';
+import 'package:winbin/screens/not_found_page.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -46,6 +47,8 @@ class AppRouterSetup {
 
         return null;
       },
+      errorBuilder: (context, state) =>
+          NotFoundScreen(uri: state.uri.toString()),
 
       routes: [
         GoRoute(
@@ -62,6 +65,7 @@ class AppRouterSetup {
             if (authProvider.rol != 'ADMIN') {
               return '/ranking';
             }
+            return null;
           },
           builder: (context, state) {
             final anchoPantalla = MediaQuery.sizeOf(context).width;
@@ -100,9 +104,11 @@ class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate? cert, String host, int port) => true;
+      ..badCertificateCallback =
+          (X509Certificate? cert, String host, int port) => true;
   }
 }
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
@@ -115,7 +121,7 @@ void main() async {
     try {
       await authProvider.obtenerPerfilUsuario();
     } catch (e) {
-      authProvider.logout();
+            authProvider.logout();
     }
   }
 
@@ -170,9 +176,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => GestionPuntosProvider()),
         ChangeNotifierProvider(create: (_) => DashboardProvider()),
         ChangeNotifierProvider(create: (_) => RankingProvider()),
-        ChangeNotifierProvider(create: (_)=> RegistroiaProvider()),
-        
-
+        ChangeNotifierProvider(create: (_) => RegistroiaProvider()),
       ],
       child: MiAppWeb(router: router),
     ),

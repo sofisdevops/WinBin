@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:winbin/utils/api_exceptions.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
 class UsuarioService {
   static final cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME'] ?? '';
@@ -32,7 +33,7 @@ class UsuarioService {
       final cloudResponse = await cloudRequest.send();
 
       if (cloudResponse.statusCode != 200 && cloudResponse.statusCode != 201) {
-        print('Error en Cloudinary: ${cloudResponse.statusCode}');
+        if (kDebugMode)print('Error en Cloudinary: ${cloudResponse.statusCode}');
         return null;
       }
 
@@ -55,12 +56,12 @@ class UsuarioService {
       if (apiResponse.statusCode == 401) {
         throw UnauthorizedException();
       } else {
-        print('Error en tu API: ${apiResponse.body}');
+       if (kDebugMode) print('Error en la API: ${apiResponse.statusCode}');
         return null;
       }
     } catch (e) {
       if (e is UnauthorizedException) rethrow;
-      print('Excepción en UsuarioService: $e');
+      if (kDebugMode)print('Excepción en UsuarioService: $e');
       return null;
     }
   }
@@ -87,12 +88,12 @@ class UsuarioService {
       }
 
       else {
-        print('Error al cambiar password: ${response.body}');
+        if (kDebugMode)print('Error al cambiar password: ${response.statusCode}');
         return false;
       }
     } catch (e) {
       if(e is UnauthorizedException) rethrow;
-      print('Excepción en cambiarPassword: $e');
+      if (kDebugMode)print('Excepción en cambiarPassword: $e');
       return false;
     }
   }
