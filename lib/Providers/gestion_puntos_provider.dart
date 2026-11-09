@@ -5,6 +5,7 @@ import 'package:winbin/models/users_model.dart';
 import 'package:winbin/services/TableServices.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:winbin/utils/api_exceptions.dart';
+import 'package:flutter/foundation.dart';
 
 class GestionPuntosProvider extends ChangeNotifier {
   final Tableservices _tableServices = Tableservices();
@@ -72,10 +73,10 @@ class GestionPuntosProvider extends ChangeNotifier {
         print('Sesión expirada detectada en GestionPuntosProvider');
         _forzarCierreDeSesion();
       } else {
-        print('Error al buscar estudiantes: $e');
+        if (kDebugMode) print('Error al buscar estudiantes: $e');
         _estudiantesEncontrados = [];
       }
-      print('Error al buscar estudiantes: $e');
+      if (kDebugMode)print('Error al buscar estudiantes: $e');
       _estudiantesEncontrados = [];
     }
 

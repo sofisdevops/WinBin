@@ -5,6 +5,7 @@ import 'package:winbin/main.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/models/historial_ranking.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:flutter/foundation.dart';
 
 class HistorialRankingProvider extends ChangeNotifier {
   final Tableservices _apiService = Tableservices();
@@ -44,7 +45,7 @@ class HistorialRankingProvider extends ChangeNotifier {
         print('Sesión expirada detectada en HistorialRankingProvider');
         _forzarCierreDeSesion();
       } else {
-        print('Error al buscar historiales de ranking: $e');
+        if (kDebugMode)print('Error al buscar historiales de ranking: $e');
         _historiales = [];
       }
       _errorMessage = e.toString();

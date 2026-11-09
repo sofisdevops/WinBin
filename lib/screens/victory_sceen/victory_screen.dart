@@ -128,9 +128,7 @@ class VictoryScreen extends StatelessWidget {
                       MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(
-                          onTap: () {
-                            print('Clic en NURTURE NEXT REGION');
-                          },
+                          onTap: () {                          },
                           child: Container(
                             decoration: BoxDecoration(
                               color: Color(0xFF7CB342),

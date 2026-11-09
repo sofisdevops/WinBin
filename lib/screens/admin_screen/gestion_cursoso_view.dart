@@ -31,8 +31,6 @@ class _GestionCursoViewState extends State<GestionCursoView> {
   }
 
   void _crearNuevoCurso() async {
-    print('nombre: ${_nombreCursoCtrl.text}');
-    print('puntos: ${_puntosCursoCtrl.text}');
     if (_nombreCursoCtrl.text.isEmpty || _puntosCursoCtrl.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, completa todos los campos')),

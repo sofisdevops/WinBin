@@ -6,6 +6,7 @@ import 'package:winbin/utils/api_exceptions.dart';
 import 'package:winbin/main.dart';
 import 'package:provider/provider.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:flutter/foundation.dart';
 
 class UsuarioProvider extends ChangeNotifier {
   final Tableservices _apiService = Tableservices();
@@ -44,7 +45,7 @@ class UsuarioProvider extends ChangeNotifier {
         print('Sesión expirada detectada en UsuarioProvider');
         forzarCierreDeSesion();
       } else {
-        print('Error al buscar estudiantes: $e');
+        if (kDebugMode)print('Error al buscar estudiantes: $e');
         _usuarios = [];
       }
       _errorMessage = e.toString();
@@ -79,10 +80,10 @@ class UsuarioProvider extends ChangeNotifier {
         print('Sesión expirada detectada en UsuarioProvider');
         forzarCierreDeSesion();
       } else {
-        print('Error al actualizar usuario: $e');
+        if (kDebugMode)print('Error al actualizar usuario: $e');
         _errorMessage = e.toString();
       }
-      print('Error al actualiza $e');
+      if (kDebugMode)print('Error al actualiza $e');
       return false;
     }
   }
@@ -155,7 +156,7 @@ class UsuarioProvider extends ChangeNotifier {
 
         return false;
       } catch (e) {
-        print('Error al actualizar el rol $e');
+        if (kDebugMode) print('Error al actualizar el rol $e');
         return false;
       }
     }

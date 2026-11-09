@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:winbin/utils/api_exceptions.dart';
+import 'package:flutter/foundation.dart';
 
 class Tableservices {
   final baseUrl = dotenv.env["BACKEND_API_URL"] ?? '';
@@ -20,7 +21,6 @@ class Tableservices {
       Uri.parse('$baseUrl/$endpoint'),
       headers: headers,
     );
-    print(response.statusCode);
     if (response.statusCode == 401) {
       throw UnauthorizedException();
     }
@@ -37,7 +37,7 @@ class Tableservices {
       else if (decodedData is List) {
         jsonList = decodedData;
       }
-      //print(jsonList);
+
       return jsonList.map((item) => fromjson(item)).toList();
     } else {
       throw Exception('Error al cargar datos desde $endpoint');
@@ -62,7 +62,6 @@ class Tableservices {
       uri = uri.replace(queryParameters: stringParams);
     }
     final response = await http.get(uri, headers: headers);
-    print(response.statusCode);
     if (response.statusCode == 401) {
       throw UnauthorizedException();
     }
@@ -92,7 +91,6 @@ class Tableservices {
       uri = uri.replace(queryParameters: stringParams);
     }
     final response = await http.get(uri, headers: headers);
-    print(response.statusCode);
     if (response.statusCode == 401) {
       throw UnauthorizedException();
     }
@@ -125,10 +123,6 @@ class Tableservices {
     final actualizar = data != null
         ? await http.put(url, headers: headers, body: jsonEncode(data))
         : await http.put(url, headers: headers);
-    //print('este es el token ${token} ');
-    print(
-      'datos recubidos ${data}, y este es la respuest del back ${actualizar.body}',
-    );
 
     if (actualizar.statusCode == 401) {
       throw UnauthorizedException();
@@ -222,14 +216,13 @@ class Tableservices {
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        print('Actualización exitosa');
         return true;
       } else {
-        print('Error en la API (${response.statusCode}): ${response.body}');
+        if (kDebugMode) print('Error en la API (${response.statusCode})');
         return false;
       }
     } catch (e) {
-      print('Error al conectar con el servidor: $e');
+       if (kDebugMode)print('Error al conectar con el servidor: $e');
       return false;
     }
   }

@@ -13,6 +13,9 @@ import 'package:winbin/utils/pdf_reperte.dart';
 import 'package:winbin/Providers/session_povider.dart';
 import 'package:winbin/Providers/ranking_provider.dart';
 import 'package:winbin/Providers/periodo_provider.dart';
+import 'package:winbin/Providers/registroIA_provider.dart';
+import 'package:winbin/Providers/AuthProvider.dart';
+import 'package:flutter/foundation.dart';
 
 class DashboardContent extends StatefulWidget {
   const DashboardContent({super.key});
@@ -47,7 +50,7 @@ class _DashboardContentState extends State<DashboardContent> {
       final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
-      debugPrint("Error capturando imagen: $e");
+      if (kDebugMode)debugPrint("Error capturando imagen: $e");
       return null;
     }
   }
@@ -59,6 +62,8 @@ class _DashboardContentState extends State<DashboardContent> {
     final rankingProvider = Provider.of<RankingProvider>(context, listen: false);
     final periodoProvider = Provider.of<PeriodoProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final registroIAProvider = Provider.of<RegistroiaProvider>(context, listen: false);
+    final userProvider = Provider.of<AuthProvider>(context, listen: false);
 
 
     final periodoActivo = periodoProvider.periodos.where((p) => p.activo).firstOrNull;
@@ -86,6 +91,10 @@ class _DashboardContentState extends State<DashboardContent> {
         await periodoProvider.fetchPeriodos();
         
       }
+      if(registroIAProvider.todosLosRegistris.isEmpty){
+        String token = authProvider.token ?? '';
+        await registroIAProvider.fetchUsuarios(token);
+      }
       
       final Uint8List? imgSesiones = await _capturarWidget(_sesionesKey);
       final Uint8List? imgReciclaje = await _capturarWidget(_reciclajeKey);
@@ -104,7 +113,7 @@ class _DashboardContentState extends State<DashboardContent> {
         'topEstudiante': rankingProvider.mejorEstudiante,
         'topCurso': rankingProvider.mejorCurso,
         'topSesiones': sessionProvider.topUsuarioSesiones,
-        'topRegistrosIA': 'pendiente',
+        'topRegistrosIA': registroIAProvider.topMaterialesRegistros,
       };
 
       

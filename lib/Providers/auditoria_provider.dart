@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:winbin/main.dart';
 import 'package:winbin/services/TableServices.dart';
 import 'package:winbin/models/auditoria_model.dart';
+import 'package:flutter/foundation.dart';
 
 class AuditoriaProvider with ChangeNotifier {
   final Tableservices _apiService = Tableservices();
@@ -65,7 +66,7 @@ class AuditoriaProvider with ChangeNotifier {
         url: socketUrl,
         onConnect: _onConnectCallback,
         onWebSocketError: (dynamic error) {
-          debugPrint('Error de WebSocket: $error');
+          if (kDebugMode)debugPrint('Error de WebSocket: $error');
           _hasWsError = true;
           _safeNotifyListeners();
         },
@@ -112,7 +113,7 @@ class AuditoriaProvider with ChangeNotifier {
               _safeNotifyListeners();
             }
           } catch (e) {
-            print("Error decodificando notificación auditoría: $e");
+            if (kDebugMode)print("Error decodificando notificación auditoría: $e");
           }
         }
       },

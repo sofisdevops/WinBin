@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -95,7 +96,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final String cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME'] ?? "";
     final String uploadPreset = dotenv.env['CLOUDINARY_UPLOAD_PRESET'] ?? "";
     if (cloudName.isEmpty || uploadPreset.isEmpty) {
-      print(' ERROR: Faltan credenciales de Cloudinary en el .env');
+      if(kDebugMode){
+          if (kDebugMode)print(' ERROR: Faltan credenciales de Cloudinary en el .env');
+      }
       return null;
     }
 
@@ -121,7 +124,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return jsonMap['secure_url']; // Link público de la imagen
       }
     } catch (e) {
-      print('Error en Cloudinary: $e');
+      if (kDebugMode)print('Error en Cloudinary: $e');
     }
     return null;
   }

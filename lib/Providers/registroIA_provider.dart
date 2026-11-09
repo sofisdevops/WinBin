@@ -6,6 +6,7 @@ import 'package:winbin/models/users_model.dart';
 import 'package:winbin/services/TableServices.dart';
 import 'package:winbin/Providers/AuthProvider.dart';
 import 'package:winbin/utils/api_exceptions.dart';
+import 'package:flutter/foundation.dart';
 
 class RegistroiaProvider extends ChangeNotifier {
   final Tableservices _tableServices = Tableservices();
@@ -18,6 +19,27 @@ class RegistroiaProvider extends ChangeNotifier {
 
   bool _cargando = false;
   bool get cargando => _cargando;
+
+  String get topMaterialesRegistros {
+    if(_todosLosRegistros.isEmpty) return 'No hay registros';
+    Map<int, int> cantidadPorMaterial = {};
+
+    for(var registro in _todosLosRegistros) {
+     int material = registro.material!.id_material!;
+      cantidadPorMaterial[material] = (cantidadPorMaterial[material] ?? 0) + 1;
+    }
+
+    int topMaterial = 0;
+    int Maximo = 0;
+
+    cantidadPorMaterial.forEach((id_material, count) {
+      if (count > Maximo) {
+        Maximo = count;
+        topMaterial = id_material;
+      }
+    });
+    return '${_todosLosRegistros.firstWhere((registro) => registro.material!.id_material == topMaterial).material!.nombreMaterial} ($Maximo Registro)';
+  }
 
   // cajas de texto para ingresar los datos de busqueda
   final TextEditingController NombreMaterialController =
@@ -53,7 +75,7 @@ class RegistroiaProvider extends ChangeNotifier {
         print('Sesión expirada detectada en UsuarioProvider');
         _forzarCierreDeSesion();
       } else {
-        print('Error al buscar estudiantes: $e');
+        if (kDebugMode)print('Error al buscar estudiantes: $e');
         _todosLosRegistros = [];
       }
       _errorMessage = e.toString();
@@ -113,10 +135,10 @@ class RegistroiaProvider extends ChangeNotifier {
         print('Sesión expirada detectada en GestionPuntosProvider');
         _forzarCierreDeSesion();
       } else {
-        print('Error al buscar estudiantes: $e');
+       if (kDebugMode) print('Error al buscar estudiantes: $e');
         _registrosEncontrados = [];
       }
-      print('Error al buscar estudiantes: $e');
+      if (kDebugMode)print('Error al buscar estudiantes: $e');
       _registrosEncontrados = [];
     }
 
